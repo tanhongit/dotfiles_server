@@ -1,9 +1,5 @@
 #!/bin/bash
 
-cd web || exit
-bash list.sh
-cd ../
-
 echo '####################################################################'
 while true; do
     if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
