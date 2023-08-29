@@ -19,7 +19,6 @@ while true; do
 
     case $yn in
     [Yy]*)
-        sudo apt install gir1.2-gda-5.0 gir1.2-gsound-1.0 -y # install gsound for 'Pano Clipboard Manager'
         cp -TRv ../../home "${ZSH_CUSTOM:-$HOME/}"
         break
         ;;
