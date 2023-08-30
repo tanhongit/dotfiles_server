@@ -7,7 +7,7 @@ while true; do
     if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
         yn="n"
     else
-        read -r -p "Do you want to change ssh port? (Y/N)  " yn
+        read -r "Do you want to change ssh port? (Y/N)  " yn
     fi
 
     case $yn in
