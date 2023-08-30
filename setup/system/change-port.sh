@@ -5,12 +5,12 @@ echo '############## Change ssh port from 22 to your type ################'
 
 while true; do
     if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
-        yn="n"
+        ynInstall="n"
     else
-        read -r "Do you want to change ssh port? (Y/N)  " yn
+        read -r "Do you want to change ssh port? (Y/N)  " ynInstall
     fi
 
-    case $yn in
+    case $ynInstall in
     [Yy]*)
         echo "=========================== ssh ==========================="
         echo "Please enter your new ssh port: "
