@@ -12,7 +12,7 @@ echo "=========================== zsh ==========================="
 bash zsh.sh
 
 installPackages() {
-    PACKAGE_LIST=("curl" "wget" "vim" "tmux" "nano" "nodejs" "npm")
+    PACKAGE_LIST=("curl" "wget" "vim" "tmux" "nano" "nodejs" "npm" "yum")
 
     for packageName in "${PACKAGE_LIST[@]}"; do
         echo "=========================== $packageName ==========================="
