@@ -30,6 +30,7 @@ while true; do
     [Yy]*)
         cd setup/develop || exit
         bash setup.sh
+        bash change-port.sh
         cd ../../
         break
         ;;
