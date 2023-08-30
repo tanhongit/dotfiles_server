@@ -3,6 +3,7 @@
 echo "=========================== Web Server ==========================="
 bash web-server.sh
 bash mariadb.sh
+bash php.sh
 
 installAptDevPackages() {
     PACKAGE_LIST=("software-properties-common" "apt-transport-https" "gpg")
