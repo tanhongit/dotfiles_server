@@ -14,6 +14,8 @@ if ! command -v $COMMAND_NAME &>/dev/null; then
         sudo systemctl enable php"$PHP_VERSION"-fpm
         sudo systemctl start php"$PHP_VERSION"-fpm
     }
+
+    phpExtensions
 else
     echo "$COMMAND_NAME install ok installed"
 fi
