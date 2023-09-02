@@ -12,6 +12,7 @@ else
         systemctl enable nginx
         sudo ufw allow in "Nginx Full"
         systemctl reload nginx
+        sudo apt install perl nginx -y
     fi
 fi
 echo ''
