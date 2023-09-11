@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd ~ || exit
-sudo apt install gcc cmake libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev
+sudo apt install gcc cmake libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev -y
 
 wget https://nginx.org/download/nginx-1.18.0.tar.gz
 tar zxvf nginx-1.18.0.tar.gz
@@ -13,7 +13,7 @@ git submodule update --init
 cd ~/nginx-1.18.0 || exit
 ./configure --with-compat --add-dynamic-module=../ngx_brotli
 make modules
-sudo cp ./objs/*.so /usr/share/nginx/modules
+sudo cp ~/nginx-1.18.0/objs/*.so /usr/share/nginx/modules
 
 cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
 
