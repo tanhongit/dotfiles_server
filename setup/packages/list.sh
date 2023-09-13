@@ -12,7 +12,7 @@ echo "=========================== zsh ==========================="
 bash zsh.sh
 
 installPackages() {
-    PACKAGE_LIST=("curl" "wget" "vim" "tmux" "nano" "nodejs" "npm" "certbot" "python3-certbot-nginx" "fail2ban")
+    PACKAGE_LIST=("curl" "wget" "vim" "tmux" "nano" "nodejs" "npm" "certbot" "python3-certbot-nginx" "fail2ban" "htop")
 
     for packageName in "${PACKAGE_LIST[@]}"; do
         echo "=========================== $packageName ==========================="
