@@ -39,7 +39,21 @@ echo ''
 echo "=========================== vite ==========================="
 COMMAND_NAME="vite"
 if ! command -v $COMMAND_NAME &>/dev/null; then
-    sudo apt-get install -y $COMMAND_NAME
+    while true; do
+        if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
+            yn="y"
+        else
+            read -r -p "Do you want to install $COMMAND_NAME? (Y/N)  " yn
+        fi
+        case $yn in
+        [Yy]*)
+            sudo apt-get install -y $COMMAND_NAME
+            break
+            ;;
+        [Nn]*) break ;;
+        *) echo "Please answer yes or no." ;;
+        esac
+    done
 else
     echo "$COMMAND_NAME install ok installed"
 fi
