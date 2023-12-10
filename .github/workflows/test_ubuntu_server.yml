@@ -33,4 +33,4 @@ jobs:
           set -e
           export CI=1
           git submodule update --init
-          bash install.sh
+          bash setup.sh
