@@ -1,7 +1,11 @@
 #!/bin/bash
 
 echo '####################################################################'
-echo '############## Change ssh port from 22 to your type ################'
+echo '############## Change ssh port to your type ################'
+
+# get current ssh port
+CURRENT_PORT=$(sudo grep -E "^Port" /etc/ssh/sshd_config | awk '{print $2}')
+echo "***** Current ssh port is $CURRENT_PORT *****"
 
 while true; do
     if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
