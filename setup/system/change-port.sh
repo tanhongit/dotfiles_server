@@ -7,6 +7,8 @@ echo '############## Change ssh port to your type ################'
 CURRENT_PORT=$(sudo grep -E "^Port" /etc/ssh/sshd_config | awk '{print $2}')
 echo "***** Current ssh port is $CURRENT_PORT *****"
 
+PORT_TYPING=$1
+
 while true; do
     if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
         yn="n"
@@ -17,7 +19,20 @@ while true; do
     case $yn in
     [Yy]*)
         echo "=========================== ssh ==========================="
-        read -r -p "Please enter your new ssh port:  " new_port
+
+        PORT_REGEX="^[0-9]+$"
+
+        if [[ -n $PORT_TYPING ]] && [[ $PORT_TYPING =~ $PORT_REGEX ]]; then
+            new_port=$PORT_TYPING
+        else
+            read -r -p "Please enter your new ssh port:  " new_port
+        fi
+
+        if [[ ! $new_port =~ $PORT_REGEX ]]; then
+            echo "Please enter a valid port number"
+            continue
+        fi
+
         sudo sed -i "s/#Port [0-9]*/Port $new_port/g" /etc/ssh/sshd_config
         sudo sed -i "s/Port [0-9]*/Port $new_port/g" /etc/ssh/sshd_config
         sudo systemctl restart sshd
