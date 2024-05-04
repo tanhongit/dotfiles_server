@@ -46,7 +46,8 @@ select opt in "8.2" "8.1" "8.0" "7.4" "7.2" "7.0" "5.6"; do
 done
 
 phpExtensions() {
-    sudo apt install php"$PHP_VERSION" php"$PHP_VERSION"-{bcmath,common,fpm,xml,mysql,zip,intl,ldap,gd,bz2,curl,mbstring,pgsql,opcache,soap,redis,imagick} -y
+    sudo apt install php"$PHP_VERSION"
+    bash php-extension.sh "$PHP_VERSION"
     sudo systemctl enable php"$PHP_VERSION"-fpm
     sudo systemctl start php"$PHP_VERSION"-fpm
 }
