@@ -2,6 +2,8 @@
 
 if [ -x "$(command -v nginx)" ]; then
     echo "Nginx already installed"
+elif [ -x "$(command -v apache2)" ]; then
+    echo "Apache2 already installed"
 else
     echo "=========================== nginx ==========================="
     PKG_OK=$(dpkg-query -W --showformat='${Status}\n' nginx | grep "install ok installed")
