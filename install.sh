@@ -63,15 +63,15 @@ case "$1" in
         setup
         ;;
 
-    ssh_port | ssh)
+    ssh_port | sp)
         change_ssh_port
         ;;
 
-    php)
+    php | php-install)
         php
         ;;
 
-    php_extension | php-ext)
+    php_extension | pe)
         php_extension "$2"
         ;;
 
