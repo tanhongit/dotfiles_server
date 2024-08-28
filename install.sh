@@ -59,11 +59,11 @@ usage() {
 }
 
 case "$1" in
-    setup)
+    setup | "")
         setup
         ;;
 
-    ssh_port)
+    ssh_port | ssh)
         change_ssh_port
         ;;
 
@@ -71,7 +71,7 @@ case "$1" in
         php
         ;;
 
-    php_extension)
+    php_extension | php-ext)
         php_extension "$2"
         ;;
 

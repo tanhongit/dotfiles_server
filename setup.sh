@@ -1,5 +1,7 @@
 #!/bin/bash
 
+THIS_DIR=$(pwd)
+
 echo '####################################################################'
 echo '####################################################################'
 echo '######################### For Ubuntu Server ########################'
@@ -15,9 +17,9 @@ echo '######################### Run package list #########################'
 echo '####################################################################'
 echo ''
 
-cd setup/packages || exit
+cd "$THIS_DIR"/setup/packages || exit
 bash list.sh
-cd ../../
+cd "$THIS_DIR" || exit
 
 echo '####################################################################'
 while true; do
@@ -28,9 +30,9 @@ while true; do
     fi
     case $yn in
     [Yy]*)
-        cd setup/develop || exit
+        cd "$THIS_DIR"/setup/develop || exit
         bash setup.sh
-        cd ../../
+        cd "$THIS_DIR" || exit
         break
         ;;
     [Nn]*) break ;;
@@ -42,19 +44,17 @@ echo '####################################################################'
 echo '############################# System ###############################'
 echo '####################################################################'
 echo ''
-cd setup/system || exit
+cd "$THIS_DIR"/setup/system || exit
 bash setup.sh
 bash change-port.sh
-cd ../../
 
 echo ''
 echo '####################################################################'
 echo '########################### after setup ############################'
 echo '####################################################################'
 echo ''
-cd setup/options || exit
+cd "$THIS_DIR"/setup/options || exit
 bash after-setup.sh
-cd ../../
 
 echo "####################################################################"
 echo "######################### install docker ###########################"
@@ -66,9 +66,9 @@ while true; do
     fi
     case $yn in
     [Yy]*)
-        cd setup/develop/ || exit
+        cd "$THIS_DIR"/setup/develop/ || exit
         bash docker.sh
-        cd ../../
+        cd "$THIS_DIR" || exit
         break
         ;;
     [Nn]*) break ;;
