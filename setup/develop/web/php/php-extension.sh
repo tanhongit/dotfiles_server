@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PHP_VERSION=$1
+PHP_VERSION=${1:-8.4}
 
 if [ -z "$PHP_VERSION" ]; then
     PHP_VERSION=$(php -v | grep -oP 'PHP [0-9]+\.[0-9]+' | head -1 | awk '{print $2}')

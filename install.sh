@@ -60,12 +60,12 @@ usage() {
     echo "  bash $0 setup"
     echo "  bash $0 ssh_port 12345"
     echo "  bash $0 php"
-    echo "  bash $0 php_extension 8.3"
+    echo "  bash $0 php_extension 8.4"
     echo ''
 }
 
 case "$1" in
-    setup | "")
+    setup | s | a)
         setup
         ;;
 
@@ -78,7 +78,7 @@ case "$1" in
         ;;
 
     php_extension | pe)
-        php_extension "$2"
+        php_extension "${2:-}"
         ;;
 
     *)
