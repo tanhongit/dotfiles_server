@@ -1,3 +1,5 @@
 setup/*.deb
 .vscode
 .idea
+.DS_Store
+.env

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+set -a
+source .env
+set +a
+set -ue
+
 CURRENT_DIR=$(pwd)
 
 echo '

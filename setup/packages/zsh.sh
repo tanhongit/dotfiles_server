@@ -1,9 +1,13 @@
 #!/bin/bash
 
+IS_FORCE=$1
+
 REQUIRED_PKG="zsh"
 PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG | grep "install ok installed")
 echo "Checking for $REQUIRED_PKG: $PKG_OK"
-if [ "" = "$PKG_OK" ]; then
+
+# Check if the package is installed. If not, install it (install if have IS_FORCE env = true)
+if [ "" = "$PKG_OK" ] || [ "true" = "$IS_FORCE" ]; then
     echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
     sudo apt-get install -y $REQUIRED_PKG
 
