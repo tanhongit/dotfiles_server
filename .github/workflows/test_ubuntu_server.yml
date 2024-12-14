@@ -33,4 +33,5 @@ jobs:
           set -e
           export CI=1
           git submodule update --init
+          cp .env.example .env
           bash setup.sh
