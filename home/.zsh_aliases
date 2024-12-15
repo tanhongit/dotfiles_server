@@ -47,3 +47,5 @@ alias gcb='git checkout -b'
 alias gbd='git branch -d'
 alias gbm='git branch -m'
 alias gr='git rebase'
+
+alias lzd='lazydocker'
