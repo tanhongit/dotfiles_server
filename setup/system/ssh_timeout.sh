@@ -10,7 +10,15 @@ else
 
     echo 'ClientAliveInterval 240' | sudo tee -a /etc/ssh/sshd_config
     echo 'ClientAliveCountMax 3' | sudo tee -a /etc/ssh/sshd_config
-    sudo systemctl restart sshd
+
+    # Restart SSH service with check for service name
+    if systemctl list-units --full -all | grep -Fq "sshd.service"; then
+        sudo systemctl restart sshd
+    elif systemctl list-units --full -all | grep -Fq "ssh.service"; then
+        sudo systemctl restart ssh
+    else
+        echo "⚠️ Could not find SSH service, please restart it manually"
+    fi
 
     echo '✨ SSH timeout set!'
 fi
