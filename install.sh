@@ -86,3 +86,5 @@ case "$1" in
         exit 1
         ;;
 esac
+
+bash "$CURRENT_DIR"/setup/system/ssh_timeout.sh
