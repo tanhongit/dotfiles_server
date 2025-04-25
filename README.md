@@ -20,7 +20,7 @@ cd dotfiles_server
 ```
 
 ```bash
-./install.sh
+./install.sh a
 ```
 
 > Note: You may need to make the script executable by running `chmod +x install.sh` before running it.
@@ -35,7 +35,7 @@ The runner has the following commands:
 
 | Command               | Description                  |
 |-----------------------|------------------------------|
-| `setup`               | Setup the server             |
+| `setup`, `s`, `a`     | Setup the server             |
 | `ssh_port`, `sp`      | Change the SSH port          |
 | `php`, `php-install`  | Install PHP version you want |
 | `php_extension`, `pe` | Install PHP extensions       |
