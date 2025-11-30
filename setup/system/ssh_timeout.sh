@@ -66,7 +66,7 @@ if [[ -n "$SSH_TTY" && $- == *i* ]]; then
                     if [ -z "$(jobs -p 2>/dev/null)" ]; then
                         # Inform the user and terminate the shell
                         if [ -n "$SSH_TTY" ]; then
-                            echo "\nSession idle for $IDLE_TIMEOUT seconds and no background jobs: disconnecting for security." > "$SSH_TTY"
+                            printf "\nSession idle for $IDLE_TIMEOUT seconds and no background jobs: disconnecting for security.\n" > "$SSH_TTY"
                         fi
                         # Kill the parent shell (login shell) to terminate the session
                         kill -HUP "$shell_pid" 2>/dev/null || kill -9 "$shell_pid" 2>/dev/null
