@@ -41,6 +41,11 @@ php_extension() {
     bash php-extension.sh "$1"
 }
 
+lazydocker() {
+    cd "$CURRENT_DIR/setup/develop" || exit
+    bash lazydocker.sh
+}
+
 usage() {
     echo "Usage: bash $0 [command] [args]"
     echo ''
@@ -49,6 +54,7 @@ usage() {
     echo '  ssh_port        Change ssh port'
     echo '  php             Install php'
     echo '  php_extension   Install php extension'
+    echo '  lazydocker      Install lazydocker'
     echo ''
     echo 'Args for ssh_port:'
     echo '  [port]          New ssh port (valid port number)'
@@ -61,6 +67,7 @@ usage() {
     echo "  bash $0 ssh_port 12345"
     echo "  bash $0 php"
     echo "  bash $0 php_extension 8.4"
+    echo "  bash $0 lazydocker"
     echo ''
 }
 
@@ -79,6 +86,10 @@ case "$1" in
 
     php_extension | pe)
         php_extension "${2:-}"
+        ;;
+
+    lazydocker | ld)
+        lazydocker
         ;;
 
     *)
