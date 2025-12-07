@@ -8,15 +8,15 @@ TARGET_COUNT=1
 # Backup and safely replace or append ClientAlive settings
 if sudo grep -qE '^ClientAliveInterval\s+' /etc/ssh/sshd_config || sudo grep -qE '^ClientAliveCountMax\s+' /etc/ssh/sshd_config; then
     echo "Updating existing ClientAlive settings to ${TARGET_INTERVAL}s and CountMax ${TARGET_COUNT}"
-    sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak.$(date +%s)
+    sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak."$(date +%s)"
     sudo sed -i.bak -E '/^ClientAliveInterval\s+/d' /etc/ssh/sshd_config || true
     sudo sed -i.bak -E '/^ClientAliveCountMax\s+/d' /etc/ssh/sshd_config || true
     echo "ClientAliveInterval ${TARGET_INTERVAL}" | sudo tee -a /etc/ssh/sshd_config >/dev/null
     echo "ClientAliveCountMax ${TARGET_COUNT}" | sudo tee -a /etc/ssh/sshd_config >/dev/null
 else
     echo "Appending ClientAlive settings (idle timeout ${TARGET_INTERVAL}s, count ${TARGET_COUNT})"
-    sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak.$(date +%s)
-    echo "\n# Enforce server-side keepalive for idle sessions" | sudo tee -a /etc/ssh/sshd_config >/dev/null
+    sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak."$(date +%s)"
+    printf "\n# Enforce server-side keepalive for idle sessions\n" | sudo tee -a /etc/ssh/sshd_config >/dev/null
     echo "ClientAliveInterval ${TARGET_INTERVAL}" | sudo tee -a /etc/ssh/sshd_config >/dev/null
     echo "ClientAliveCountMax ${TARGET_COUNT}" | sudo tee -a /etc/ssh/sshd_config >/dev/null
 fi
