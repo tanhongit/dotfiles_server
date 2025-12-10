@@ -12,6 +12,7 @@ This script is used to set up a new server with my dotfiles.
 Clone the repository and run the script:
 
 ```bash
+# git clone --depth=1 https://github.com/tanhongit/dotfiles_server.git
 git clone git@github.com:tanhongit/dotfiles_server.git
 ```
 
