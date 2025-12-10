@@ -75,23 +75,3 @@ while true; do
     *) echo "Please answer yes or no." ;;
     esac
 done
-
-echo "####################################################################"
-echo "######################## install lazydocker ########################"
-while true; do
-    if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
-        yn="y"
-    else
-        read -r -p "Do you want to install lazydocker? (Y/N)  " yn
-    fi
-    case $yn in
-    [Yy]*)
-        cd "$THIS_DIR"/setup/develop/ || exit
-        bash lazydocker.sh
-        cd "$THIS_DIR" || exit
-        break
-        ;;
-    [Nn]*) break ;;
-    *) echo "Please answer yes or no." ;;
-    esac
-done
