@@ -35,8 +35,27 @@ while true; do
 
         sudo sed -i "s/#Port [0-9]*/Port $new_port/g" /etc/ssh/sshd_config
         sudo sed -i "s/Port [0-9]*/Port $new_port/g" /etc/ssh/sshd_config
-        sudo systemctl restart sshd
+
+        # Disable ssh.socket to allow port in sshd_config to take effect (Ubuntu 22.10+, 24.04, 24.10)
+        echo "Disabling ssh.socket to ensure port configuration takes effect..."
+        sudo systemctl stop ssh.socket 2>/dev/null || true
+        sudo systemctl disable ssh.socket 2>/dev/null || true
+        sudo systemctl daemon-reload
+
+        # Restart SSH service
+        sudo systemctl restart ssh 2>/dev/null || sudo systemctl restart sshd 2>/dev/null
+        sudo systemctl enable ssh 2>/dev/null || sudo systemctl enable sshd 2>/dev/null
+
+        echo ""
         echo "SSH port changed to $new_port"
+        echo ""
+        echo "Verifying SSH is listening on port $new_port..."
+        sudo ss -tlnp | grep ssh || sudo netstat -tlnp | grep ssh
+        echo ""
+        echo "⚠️  IMPORTANT: Keep this SSH session open!"
+        echo "⚠️  Test the new port from another terminal before closing this session:"
+        echo "    ssh -p $new_port user@your_server_ip"
+        echo ""
         break
         ;;
     [Nn]*) break ;;
