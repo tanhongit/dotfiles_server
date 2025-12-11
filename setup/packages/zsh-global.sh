@@ -140,7 +140,7 @@ fi
 echo ""
 echo "Copying Powerlevel10k configuration from home/.p10k.zsh..."
 
-HOME_P10K="$SCRIPT_DIR/home/.p10k.zsh"
+HOME_P10K="$SCRIPT_DIR/home/.p10k.zsh.default"
 
 if [ -f "$HOME_P10K" ]; then
     sudo cp "$HOME_P10K" /etc/skel/.p10k.zsh

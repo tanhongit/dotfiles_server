@@ -1,0 +1,21 @@
+# Powerlevel10k instant prompt
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Basic Powerlevel10k configuration
+typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
+  dir                     # current directory
+  vcs                     # git status
+)
+
+typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
+  status                  # exit code of the last command
+  command_execution_time  # duration of the last command
+  background_jobs         # presence of background jobs
+  context                 # user@hostname
+  time                    # current time
+)
+
+typeset -g POWERLEVEL9K_MODE='nerdfont-complete'
+typeset -g POWERLEVEL9K_ICON_PADDING=moderate
