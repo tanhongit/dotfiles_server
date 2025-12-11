@@ -65,16 +65,22 @@ fi
 # Set permissions
 sudo chmod -R 755 "$OH_MY_ZSH_GLOBAL"
 
-# Create global zshrc template
+# Create global zshrc template from home/.zshrc
 echo ""
-echo "Creating global ZSH configuration template..."
+echo "Creating global ZSH configuration template from home/.zshrc..."
 
-sudo tee /etc/skel/.zshrc > /dev/null <<'EOF'
+# Get the script directory to find home/.zshrc
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+HOME_ZSHRC="$SCRIPT_DIR/home/.zshrc"
+HOME_ZSH_ALIASES="$SCRIPT_DIR/home/.zsh_aliases"
+
+if [ ! -f "$HOME_ZSHRC" ]; then
+    echo "⚠️  Warning: $HOME_ZSHRC not found, using default config"
+    sudo tee /etc/skel/.zshrc > /dev/null <<'EOF'
 # Path to your oh-my-zsh installation.
 export ZSH="/usr/share/oh-my-zsh"
 
 # Set name of the theme to load
-# ZSH_THEME="robbyrussell"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Plugins
@@ -94,12 +100,8 @@ source $ZSH/oh-my-zsh.sh
 export LANG=en_US.UTF-8
 export EDITOR='vim'
 
-# Aliases
-alias ll='ls -lah'
-alias la='ls -A'
-alias l='ls -CF'
-alias ..='cd ..'
-alias ...='cd ../..'
+# Load aliases
+[ -f ~/.zsh_aliases ] && source ~/.zsh_aliases
 
 # NVM configuration
 export NVM_DIR="/usr/local/nvm"
@@ -109,14 +111,43 @@ export NVM_DIR="/usr/local/nvm"
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 EOF
+else
+    # Copy and modify .zshrc to use global paths
+    sudo cp "$HOME_ZSHRC" /etc/skel/.zshrc
 
-echo "✓ Created /etc/skel/.zshrc template"
+    # Update paths in .zshrc to use global installation
+    sudo sed -i 's|export ZSH="$HOME/.oh-my-zsh"|export ZSH="/usr/share/oh-my-zsh"|g' /etc/skel/.zshrc
 
-# Create default p10k config for new users
+    # Update NVM path to global
+    sudo sed -i 's|export NVM_DIR="$HOME/.nvm"|export NVM_DIR="/usr/local/nvm"|g' /etc/skel/.zshrc
+
+    # Comment out the direct plugin source lines since they're already in global location
+    sudo sed -i 's|^source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh|# source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh # Loaded via plugins|g' /etc/skel/.zshrc
+    sudo sed -i 's|^source ~/.oh-my-zsh/custom/plugins/fast-syntax-highlighting/F-Sy-H.plugin.zsh|# source ~/.oh-my-zsh/custom/plugins/fast-syntax-highlighting/F-Sy-H.plugin.zsh # Loaded via plugins|g' /etc/skel/.zshrc
+
+    echo "✓ Created /etc/skel/.zshrc from home/.zshrc with global paths"
+fi
+
+# Copy .zsh_aliases if exists
+if [ -f "$HOME_ZSH_ALIASES" ]; then
+    sudo cp "$HOME_ZSH_ALIASES" /etc/skel/.zsh_aliases
+    echo "✓ Copied home/.zsh_aliases to /etc/skel/.zsh_aliases"
+else
+    echo "⚠️  Warning: $HOME_ZSH_ALIASES not found, skipping"
+fi
+
+# Copy p10k config from home/.p10k.zsh
 echo ""
-echo "Creating default Powerlevel10k configuration..."
+echo "Copying Powerlevel10k configuration from home/.p10k.zsh..."
 
-sudo tee /etc/skel/.p10k.zsh > /dev/null <<'EOF'
+HOME_P10K="$SCRIPT_DIR/home/.p10k.zsh"
+
+if [ -f "$HOME_P10K" ]; then
+    sudo cp "$HOME_P10K" /etc/skel/.p10k.zsh
+    echo "✓ Copied home/.p10k.zsh to /etc/skel/.p10k.zsh"
+else
+    echo "⚠️  Warning: $HOME_P10K not found, creating basic config"
+    sudo tee /etc/skel/.p10k.zsh > /dev/null <<'EOF'
 # Powerlevel10k instant prompt
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
@@ -139,8 +170,8 @@ typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
 typeset -g POWERLEVEL9K_MODE='nerdfont-complete'
 typeset -g POWERLEVEL9K_ICON_PADDING=moderate
 EOF
-
-echo "✓ Created /etc/skel/.p10k.zsh template"
+    echo "✓ Created basic /etc/skel/.p10k.zsh template"
+fi
 
 # Update current user's zshrc if exists
 CURRENT_USER_HOME="$HOME"
@@ -182,13 +213,15 @@ if [ -f "$USER_HOME/.zshrc" ]; then
     echo "✓ Backed up existing .zshrc"
 fi
 
-# Copy template
+# Copy templates
 cp /etc/skel/.zshrc "$USER_HOME/.zshrc"
 cp /etc/skel/.p10k.zsh "$USER_HOME/.p10k.zsh" 2>/dev/null || true
+cp /etc/skel/.zsh_aliases "$USER_HOME/.zsh_aliases" 2>/dev/null || true
 
 # Fix permissions
 chown "$USER_TO_SETUP:$USER_TO_SETUP" "$USER_HOME/.zshrc"
 [ -f "$USER_HOME/.p10k.zsh" ] && chown "$USER_TO_SETUP:$USER_TO_SETUP" "$USER_HOME/.p10k.zsh"
+[ -f "$USER_HOME/.zsh_aliases" ] && chown "$USER_TO_SETUP:$USER_TO_SETUP" "$USER_HOME/.zsh_aliases"
 
 echo "✓ ZSH configured for $USER_TO_SETUP"
 echo ""
