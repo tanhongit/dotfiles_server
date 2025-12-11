@@ -31,6 +31,11 @@ change_ssh_port() {
     bash change-port.sh
 }
 
+ssh_timeout() {
+    cd "$CURRENT_DIR/setup/system" || exit
+    bash ssh_timeout.sh
+}
+
 php() {
     cd "$CURRENT_DIR/setup/develop/web/php" || exit
     bash php-handler.sh
@@ -46,15 +51,22 @@ lazydocker() {
     bash lazydocker.sh
 }
 
+global_dev_setup() {
+    cd "$CURRENT_DIR/setup/packages" || exit
+    bash global-dev-setup.sh
+}
+
 usage() {
     echo "Usage: bash $0 [command] [args]"
     echo ''
     echo 'Commands:'
     echo '  setup           Show welcome message'
     echo '  ssh_port        Change ssh port'
+    echo '  ssh_timeout     Configure SSH timeout (auto disconnect after 5min idle)'
     echo '  php             Install php'
     echo '  php_extension   Install php extension'
     echo '  lazydocker      Install lazydocker'
+    echo '  global_dev      Setup NVM, NPM, ZSH globally for all users'
     echo ''
     echo 'Args for ssh_port:'
     echo '  [port]          New ssh port (valid port number)'
@@ -65,9 +77,11 @@ usage() {
     echo 'Example:'
     echo "  bash $0 setup"
     echo "  bash $0 ssh_port 12345"
+    echo "  bash $0 ssh_timeout"
     echo "  bash $0 php"
     echo "  bash $0 php_extension 8.4"
     echo "  bash $0 lazydocker"
+    echo "  bash $0 global_dev"
     echo ''
 }
 
@@ -78,6 +92,10 @@ case "$1" in
 
     ssh_port | sp)
         change_ssh_port
+        ;;
+
+    ssh_timeout | st)
+        ssh_timeout
         ;;
 
     php | php-install)
@@ -92,10 +110,13 @@ case "$1" in
         lazydocker
         ;;
 
+    global_dev | gd)
+        global_dev_setup
+        ;;
+
     *)
         usage
         exit 1
         ;;
 esac
 
-bash "$CURRENT_DIR"/setup/system/ssh_timeout.sh
