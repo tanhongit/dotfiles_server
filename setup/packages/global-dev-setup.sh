@@ -1,7 +1,13 @@
 #!/bin/bash
 
 # Setup development environment globally for all users
-# This script will install and configure NVM, Node.js, NPM, and ZSH
+# This script will install and configure NVM, Node.js, NPM, Yarn, and ZSH
+
+# Parse arguments
+FORCE_UPDATE=false
+if [ "${1:-}" = "-f" ] || [ "${1:-}" = "--force" ]; then
+    FORCE_UPDATE=true
+fi
 
 echo "======================================================="
 echo "  Global Development Environment Setup"
@@ -12,11 +18,16 @@ echo "  ✓ ZSH with Oh-My-Zsh"
 echo "  ✓ NVM (Node Version Manager)"
 echo "  ✓ Node.js (LTS version)"
 echo "  ✓ NPM (Node Package Manager)"
+echo "  ✓ Yarn (Package Manager)"
 echo ""
 echo "All configurations will be available for:"
 echo "  - Current user"
 echo "  - All new users created in the future"
 echo ""
+if [ "$FORCE_UPDATE" = true ]; then
+    echo "⚡ FORCE MODE: Will update dotfiles for all existing users"
+    echo ""
+fi
 echo "======================================================="
 echo ""
 
@@ -36,9 +47,13 @@ CURRENT_DIR=$(dirname "$(readlink -f "$0")")
 
 # Step 1: Install ZSH globally
 echo ""
-echo "Step 1/2: Installing ZSH globally..."
+echo "Step 1/3: Installing ZSH globally..."
 echo "---------------------------------------------------"
-bash "$CURRENT_DIR/zsh-global.sh"
+if [ "$FORCE_UPDATE" = true ]; then
+    bash "$CURRENT_DIR/zsh-global.sh" --force
+else
+    bash "$CURRENT_DIR/zsh-global.sh"
+fi
 
 if [ $? -ne 0 ]; then
     echo "❌ Error: ZSH installation failed"
@@ -47,12 +62,23 @@ fi
 
 # Step 2: Install NVM globally
 echo ""
-echo "Step 2/2: Installing NVM globally..."
+echo "Step 2/3: Installing NVM globally..."
 echo "---------------------------------------------------"
 bash "$CURRENT_DIR/nvm-global.sh"
 
 if [ $? -ne 0 ]; then
     echo "❌ Error: NVM installation failed"
+    exit 1
+fi
+
+# Step 3: Install Yarn globally
+echo ""
+echo "Step 3/3: Installing Yarn globally..."
+echo "---------------------------------------------------"
+bash "$CURRENT_DIR/yarn-global.sh"
+
+if [ $? -ne 0 ]; then
+    echo "❌ Error: Yarn installation failed"
     exit 1
 fi
 
@@ -67,6 +93,7 @@ echo "  ✓ ZSH + Oh-My-Zsh (globally at /usr/share/oh-my-zsh)"
 echo "  ✓ NVM (globally at /usr/local/nvm)"
 echo "  ✓ Node.js LTS"
 echo "  ✓ NPM"
+echo "  ✓ Yarn"
 echo ""
 echo "🔧 Configuration:"
 echo "  ✓ All new users will automatically have access"

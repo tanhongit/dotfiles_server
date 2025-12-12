@@ -53,7 +53,11 @@ lazydocker() {
 
 global_dev_setup() {
     cd "$CURRENT_DIR/setup/packages" || exit
-    bash global-dev-setup.sh
+    if [ "${2:-}" = "-f" ] || [ "${2:-}" = "--force" ]; then
+        bash global-dev-setup.sh --force
+    else
+        bash global-dev-setup.sh
+    fi
 }
 
 usage() {
@@ -66,7 +70,10 @@ usage() {
     echo '  php             Install php'
     echo '  php_extension   Install php extension'
     echo '  lazydocker      Install lazydocker'
-    echo '  global_dev      Setup NVM, NPM, ZSH globally for all users'
+    echo '  global_dev      Setup NVM, NPM, Yarn, ZSH globally for all users'
+    echo ''
+    echo 'Args for global_dev:'
+    echo '  -f, --force     Force copy/update dotfiles to all existing users'
     echo ''
     echo 'Args for ssh_port:'
     echo '  [port]          New ssh port (valid port number)'
@@ -82,10 +89,11 @@ usage() {
     echo "  bash $0 php_extension 8.4"
     echo "  bash $0 lazydocker"
     echo "  bash $0 global_dev"
+    echo "  bash $0 global_dev -f"
     echo ''
 }
 
-case "$1" in
+case "${1:-}" in
     setup | s | a)
         setup
         ;;
@@ -111,7 +119,7 @@ case "$1" in
         ;;
 
     global_dev | gd)
-        global_dev_setup
+        global_dev_setup "$@"
         ;;
 
     *)

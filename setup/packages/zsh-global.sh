@@ -2,8 +2,17 @@
 
 # Install and configure ZSH globally for all users (including new users)
 
+# Parse arguments
+FORCE_UPDATE=false
+if [ "${1:-}" = "-f" ] || [ "${1:-}" = "--force" ]; then
+    FORCE_UPDATE=true
+fi
+
 echo "================================"
 echo "Setting up ZSH globally for all users"
+if [ "$FORCE_UPDATE" = true ]; then
+    echo "⚡ FORCE MODE ENABLED ⚡"
+fi
 echo "================================"
 echo ""
 
@@ -324,6 +333,49 @@ EOF
 
 sudo chmod +x /usr/local/bin/setup-zsh-user
 
+# Force update all existing users if --force flag is set
+if [ "$FORCE_UPDATE" = true ]; then
+    echo ""
+    echo "================================"
+    echo "⚡ Force updating dotfiles for all existing users..."
+    echo "================================"
+    echo ""
+    
+    # Get all normal users (UID >= 1000 and UID < 65534)
+    ALL_USERS=$(awk -F: '$3 >= 1000 && $3 < 65534 {print $1}' /etc/passwd)
+    
+    for username in $ALL_USERS; do
+        user_home=$(eval echo "~$username")
+        
+        if [ -d "$user_home" ]; then
+            echo "→ Updating dotfiles for user: $username ($user_home)"
+            
+            # Backup existing files
+            if [ -f "$user_home/.zshrc" ]; then
+                sudo cp "$user_home/.zshrc" "$user_home/.zshrc.backup.$(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
+            fi
+            
+            # Copy new dotfiles
+            sudo cp /etc/skel/.zshrc "$user_home/.zshrc" 2>/dev/null || true
+            sudo cp /etc/skel/.p10k.zsh "$user_home/.p10k.zsh" 2>/dev/null || true
+            sudo cp /etc/skel/.zsh_aliases "$user_home/.zsh_aliases" 2>/dev/null || true
+            
+            # Fix ownership
+            sudo chown "$username:$username" "$user_home/.zshrc" 2>/dev/null || true
+            sudo chown "$username:$username" "$user_home/.p10k.zsh" 2>/dev/null || true
+            sudo chown "$username:$username" "$user_home/.zsh_aliases" 2>/dev/null || true
+            
+            echo "  ✓ Updated dotfiles for $username"
+        else
+            echo "  ⚠️  Home directory not found for $username, skipping..."
+        fi
+    done
+    
+    echo ""
+    echo "✅ Force update completed for all existing users!"
+    echo ""
+fi
+
 echo ""
 echo "================================"
 echo "✓ ZSH global setup completed!"
@@ -332,14 +384,16 @@ echo ""
 echo "📌 Oh-My-Zsh installed at: $OH_MY_ZSH_GLOBAL"
 echo "📌 All new users will have ZSH automatically configured"
 echo ""
-echo "📌 To setup ZSH for existing users, run:"
-echo "   sudo setup-zsh-user [username]"
-echo "   sudo chsh -s /bin/zsh [username]"
-echo ""
-echo "📌 To setup ZSH for current user:"
-echo "   sudo setup-zsh-user"
-echo "   sudo chsh -s /bin/zsh $USER"
-echo ""
+if [ "$FORCE_UPDATE" = false ]; then
+    echo "📌 To setup ZSH for existing users, run:"
+    echo "   sudo setup-zsh-user [username]"
+    echo "   sudo chsh -s /bin/zsh [username]"
+    echo ""
+    echo "📌 To setup ZSH for current user:"
+    echo "   sudo setup-zsh-user"
+    echo "   sudo chsh -s /bin/zsh $USER"
+    echo ""
+fi
 echo "📌 Installed plugins:"
 echo "   - fast-syntax-highlighting"
 echo "   - zsh-autosuggestions"
