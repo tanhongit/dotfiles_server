@@ -1,12 +1,13 @@
 # Global Development Environment Setup
 
-Scripts để cài đặt và cấu hình môi trường development (NVM, Node.js, NPM, ZSH) cho tất cả user trên server, bao gồm cả user mới tạo trong tương lai.
+Scripts để cài đặt và cấu hình môi trường development (NVM, Node.js, NPM, Yarn, ZSH) cho tất cả user trên server, bao gồm cả user mới tạo trong tương lai.
 
 ## 🚀 Tính năng
 
 - ✅ **NVM** (Node Version Manager) cài đặt global tại `/usr/local/nvm`
 - ✅ **Node.js LTS** - Phiên bản mới nhất
 - ✅ **NPM** - Đi kèm với Node.js
+- ✅ **Yarn** - Package Manager được cài global
 - ✅ **ZSH** với Oh-My-Zsh cài đặt global tại `/usr/share/oh-my-zsh`
 - ✅ **Plugins ZSH**:
   - fast-syntax-highlighting
@@ -14,6 +15,7 @@ Scripts để cài đặt và cấu hình môi trường development (NVM, Node.
 - ✅ **Powerlevel10k theme** - Theme đẹp và mạnh mẽ cho ZSH
 - ✅ Tự động cấu hình cho **tất cả user mới** qua `/etc/skel/`
 - ✅ Helper script để setup cho **existing users**
+- ✅ **Force update mode** - Cập nhật dotfiles cho tất cả users hiện tại
 
 ## 📦 Cài đặt
 
@@ -25,7 +27,18 @@ sudo bash install.sh global_dev
 
 # Hoặc dùng alias
 sudo bash install.sh gd
+
+# Force update dotfiles cho tất cả users hiện tại
+sudo bash install.sh global_dev -f
+# hoặc
+sudo bash install.sh gd --force
 ```
+
+**Force Mode (`-f` hoặc `--force`):**
+- Tự động copy/update các dotfiles từ folder `home/` cho **tất cả users** hiện tại (UID >= 1000)
+- Backup các file config cũ trước khi update
+- Áp dụng cấu hình mới cho tất cả users
+- Files được update: `.zshrc`, `.zsh_aliases`, `.p10k.zsh`
 
 ### Cách 2: Chạy từng script riêng lẻ
 
@@ -38,8 +51,14 @@ sudo bash zsh-global.sh
 # Setup NVM globally
 sudo bash nvm-global.sh
 
+# Setup Yarn globally
+sudo bash yarn-global.sh
+
 # Hoặc chạy script tổng hợp
 sudo bash global-dev-setup.sh
+
+# Với force mode
+sudo bash global-dev-setup.sh --force
 ```
 
 ## 🔧 Cấu hình sau khi cài đặt
@@ -117,6 +136,9 @@ node --version
 # Kiểm tra NPM
 npm --version
 
+# Kiểm tra Yarn
+yarn --version
+
 # Kiểm tra ZSH
 zsh --version
 
@@ -170,6 +192,25 @@ nvm use 18.20.0
 nvm alias default 18.20.0
 ```
 
+### Sử dụng Yarn
+
+```bash
+# Kiểm tra version
+yarn --version
+
+# Khởi tạo project mới
+yarn init
+
+# Thêm package
+yarn add express
+
+# Cài dependencies
+yarn install
+
+# Upgrade dependencies
+yarn upgrade
+```
+
 ## 🐛 Troubleshooting
 
 ### NVM command not found
@@ -216,6 +257,7 @@ sudo chmod -R 755 /usr/share/oh-my-zsh
 ## 🔗 Links
 
 - [NVM GitHub](https://github.com/nvm-sh/nvm)
+- [Yarn](https://yarnpkg.com/)
 - [Oh-My-Zsh](https://ohmyz.sh/)
 - [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
 - [Fast Syntax Highlighting](https://github.com/zdharma-continuum/fast-syntax-highlighting)

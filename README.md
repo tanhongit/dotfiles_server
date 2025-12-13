@@ -34,12 +34,45 @@ cd dotfiles_server
 
 The runner has the following commands:
 
-| Command               | Description                  |
-|-----------------------|------------------------------|
-| `setup`, `s`, `a`     | Setup the server             |
-| `ssh_port`, `sp`      | Change the SSH port          |
-| `php`, `php-install`  | Install PHP version you want |
-| `php_extension`, `pe` | Install PHP extensions       |
+| Command               | Description                                                        |
+|-----------------------|--------------------------------------------------------------------|
+| `setup`, `s`, `a`     | Setup the server                                                   |
+| `ssh_port`, `sp`      | Change the SSH port                                                |
+| `ssh_timeout`, `st`   | Configure SSH timeout (auto disconnect after 5min idle)            |
+| `php`, `php-install`  | Install PHP version you want                                       |
+| `php_extension`, `pe` | Install PHP extensions                                             |
+| `lazydocker`, `ld`    | Install lazydocker                                                 |
+| `global_dev`, `gd`    | Setup NVM, NPM, Yarn, ZSH globally for all users                   |
+
+### Global Dev Setup
+
+Setup development environment globally for all users (including new users):
+
+```bash
+sudo bash install.sh global_dev
+# or
+sudo bash install.sh gd
+```
+
+This will install and configure:
+- ✓ ZSH with Oh-My-Zsh (Powerlevel10k theme)
+- ✓ NVM (Node Version Manager)
+- ✓ Node.js (LTS version)
+- ✓ NPM (Node Package Manager)
+- ✓ Yarn (Package Manager)
+
+**Force update dotfiles for all existing users:**
+
+```bash
+sudo bash install.sh global_dev -f
+# or
+sudo bash install.sh gd --force
+```
+
+The `-f` or `--force` flag will:
+- Force copy/update all dotfiles (.zshrc, .zsh_aliases, .p10k.zsh) from `home/` folder to all existing users
+- Backup existing dotfiles before updating
+- Apply new configuration to all users with UID >= 1000
 
 ## License
 
