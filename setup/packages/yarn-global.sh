@@ -33,9 +33,7 @@ if command -v yarn &>/dev/null; then
     yarn --version
 else
     echo "Installing Yarn globally via npm..."
-    npm install -g yarn
-    
-    if [ $? -eq 0 ]; then
+    if npm install -g yarn; then
         echo "✓ Yarn installed successfully"
         yarn --version
     else

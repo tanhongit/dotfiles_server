@@ -75,9 +75,7 @@ fi
 echo ""
 echo "Step 3/3: Installing Yarn globally..."
 echo "---------------------------------------------------"
-bash "$CURRENT_DIR/yarn-global.sh"
-
-if [ $? -ne 0 ]; then
+if ! bash "$CURRENT_DIR/yarn-global.sh"; then
     echo "❌ Error: Yarn installation failed"
     exit 1
 fi

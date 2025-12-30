@@ -122,11 +122,13 @@ if [ -f "$CURRENT_USER_HOME/.bashrc" ] && ! grep -q "NVM_DIR.*usr/local/nvm" "$C
 fi
 
 if [ -f "$CURRENT_USER_HOME/.zshrc" ] && ! grep -q "NVM_DIR.*usr/local/nvm" "$CURRENT_USER_HOME/.zshrc"; then
-    echo "" >> "$CURRENT_USER_HOME/.zshrc"
-    echo "# NVM configuration" >> "$CURRENT_USER_HOME/.zshrc"
-    echo 'export NVM_DIR="/usr/local/nvm"' >> "$CURRENT_USER_HOME/.zshrc"
-    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> "$CURRENT_USER_HOME/.zshrc"
-    echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> "$CURRENT_USER_HOME/.zshrc"
+    {
+        echo ""
+        echo "# NVM configuration"
+        echo "export NVM_DIR=\"/usr/local/nvm\""
+        echo "[ -s \"\$NVM_DIR/nvm.sh\" ] && \\. \"\$NVM_DIR/nvm.sh\""
+        echo "[ -s \"\$NVM_DIR/bash_completion\" ] && \\. \"\$NVM_DIR/bash_completion\""
+    } >> "$CURRENT_USER_HOME/.zshrc"
     echo "✓ Updated current user's .zshrc"
 fi
 
