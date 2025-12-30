@@ -113,11 +113,13 @@ fi
 # Update existing users (optional - only for current user)
 CURRENT_USER_HOME="$HOME"
 if [ -f "$CURRENT_USER_HOME/.bashrc" ] && ! grep -q "NVM_DIR.*usr/local/nvm" "$CURRENT_USER_HOME/.bashrc"; then
-    echo "" >> "$CURRENT_USER_HOME/.bashrc"
-    echo "# NVM configuration" >> "$CURRENT_USER_HOME/.bashrc"
-    echo 'export NVM_DIR="/usr/local/nvm"' >> "$CURRENT_USER_HOME/.bashrc"
-    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> "$CURRENT_USER_HOME/.bashrc"
-    echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> "$CURRENT_USER_HOME/.bashrc"
+    {
+        echo ""
+        echo "# NVM configuration"
+        echo "export NVM_DIR=\"/usr/local/nvm\""
+        echo "[ -s \"\$NVM_DIR/nvm.sh\" ] && \\. \"\$NVM_DIR/nvm.sh\""
+        echo "[ -s \"\$NVM_DIR/bash_completion\" ] && \\. \"\$NVM_DIR/bash_completion\""
+    } >> "$CURRENT_USER_HOME/.bashrc"
     echo "✓ Updated current user's .bashrc"
 fi
 

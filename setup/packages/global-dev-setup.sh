@@ -50,23 +50,22 @@ echo ""
 echo "Step 1/3: Installing ZSH globally..."
 echo "---------------------------------------------------"
 if [ "$FORCE_UPDATE" = true ]; then
-    bash "$CURRENT_DIR/zsh-global.sh" --force
+    if ! bash "$CURRENT_DIR/zsh-global.sh" --force; then
+        echo "❌ Error: ZSH installation failed"
+        exit 1
+    fi
 else
-    bash "$CURRENT_DIR/zsh-global.sh"
-fi
-
-if [ $? -ne 0 ]; then
-    echo "❌ Error: ZSH installation failed"
-    exit 1
+    if ! bash "$CURRENT_DIR/zsh-global.sh"; then
+        echo "❌ Error: ZSH installation failed"
+        exit 1
+    fi
 fi
 
 # Step 2: Install NVM globally
 echo ""
 echo "Step 2/3: Installing NVM globally..."
 echo "---------------------------------------------------"
-bash "$CURRENT_DIR/nvm-global.sh"
-
-if [ $? -ne 0 ]; then
+if ! bash "$CURRENT_DIR/nvm-global.sh"; then
     echo "❌ Error: NVM installation failed"
     exit 1
 fi
