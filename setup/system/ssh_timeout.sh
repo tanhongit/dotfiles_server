@@ -19,7 +19,12 @@ echo ''
 
 echo '1️⃣ Setting TMOUT for all users...'
 
-# Add TMOUT to /etc/profile.d/ for bash users
+# Remove old TMOUT entries to avoid duplicates and readonly errors
+sudo sed -i '/TMOUT/d' /etc/profile 2>/dev/null
+sudo sed -i '/Auto logout after/d' /etc/profile 2>/dev/null
+sudo rm -f /etc/profile.d/ssh-timeout.sh 2>/dev/null
+
+# Add TMOUT to /etc/profile.d/ for bash users (ONLY place for bash)
 sudo tee /etc/profile.d/ssh-timeout.sh > /dev/null <<EOF
 # Auto logout after 5 minutes of inactivity
 TMOUT=$TIMEOUT_SECONDS
@@ -30,18 +35,6 @@ EOF
 sudo chmod +x /etc/profile.d/ssh-timeout.sh
 echo '✓ Created /etc/profile.d/ssh-timeout.sh (for bash)'
 
-# Also add to /etc/profile for compatibility
-if ! grep -q "^TMOUT=" /etc/profile 2>/dev/null; then
-    echo "" | sudo tee -a /etc/profile > /dev/null
-    echo "# Auto logout after 5 minutes of inactivity" | sudo tee -a /etc/profile > /dev/null
-    echo "TMOUT=$TIMEOUT_SECONDS" | sudo tee -a /etc/profile > /dev/null
-    echo "readonly TMOUT" | sudo tee -a /etc/profile > /dev/null
-    echo "export TMOUT" | sudo tee -a /etc/profile > /dev/null
-    echo '✓ Added TMOUT to /etc/profile'
-else
-    echo '✓ TMOUT already exists in /etc/profile'
-fi
-
 # Add TMOUT for ZSH users - ZSH doesn't load /etc/profile.d/ by default
 echo ''
 echo '1️⃣.1 Setting TMOUT for ZSH users...'
@@ -49,46 +42,25 @@ echo '1️⃣.1 Setting TMOUT for ZSH users...'
 # Create /etc/zsh directory if not exists
 sudo mkdir -p /etc/zsh
 
-# Add to /etc/zsh/zshenv (loaded for all zsh sessions)
-if ! grep -q "^TMOUT=" /etc/zsh/zshenv 2>/dev/null; then
-    sudo tee -a /etc/zsh/zshenv > /dev/null <<EOF
+# Remove old TMOUT entries to avoid duplicates and readonly errors
+sudo sed -i '/TMOUT/d' /etc/zsh/zshenv 2>/dev/null
+sudo sed -i '/TMOUT/d' /etc/zsh/zshrc 2>/dev/null
+sudo sed -i '/Auto logout after/d' /etc/zsh/zshenv 2>/dev/null
+sudo sed -i '/Auto logout after/d' /etc/zsh/zshrc 2>/dev/null
+
+# Add to /etc/zsh/zshenv ONLY (loaded first for all zsh sessions)
+sudo tee -a /etc/zsh/zshenv > /dev/null <<EOF
 
 # Auto logout after 5 minutes of inactivity
 TMOUT=$TIMEOUT_SECONDS
 readonly TMOUT
 export TMOUT
 EOF
-    echo '✓ Added TMOUT to /etc/zsh/zshenv'
-else
-    echo '✓ TMOUT already exists in /etc/zsh/zshenv'
-fi
+echo '✓ Added TMOUT to /etc/zsh/zshenv'
 
-# Also add to /etc/zsh/zshrc for interactive shells
-if ! grep -q "^TMOUT=" /etc/zsh/zshrc 2>/dev/null; then
-    sudo tee -a /etc/zsh/zshrc > /dev/null <<EOF
-
-# Auto logout after 5 minutes of inactivity
-TMOUT=$TIMEOUT_SECONDS
-readonly TMOUT
-export TMOUT
-EOF
-    echo '✓ Added TMOUT to /etc/zsh/zshrc'
-else
-    echo '✓ TMOUT already exists in /etc/zsh/zshrc'
-fi
-
-# Add to /etc/skel/.zshrc for new users
-if [ -f /etc/skel/.zshrc ]; then
-    if ! grep -q "^TMOUT=" /etc/skel/.zshrc 2>/dev/null; then
-        sudo tee -a /etc/skel/.zshrc > /dev/null <<EOF
-
-# Auto logout after 5 minutes of inactivity
-TMOUT=$TIMEOUT_SECONDS
-export TMOUT
-EOF
-        echo '✓ Added TMOUT to /etc/skel/.zshrc'
-    fi
-fi
+# Remove TMOUT from /etc/skel/.zshrc if exists (avoid conflicts)
+sudo sed -i '/TMOUT/d' /etc/skel/.zshrc 2>/dev/null
+sudo sed -i '/Auto logout after/d' /etc/skel/.zshrc 2>/dev/null
 
 # ============ Method 2: ClientAlive (Network keepalive) ============
 # Keep this to ensure disconnection when network has issues
