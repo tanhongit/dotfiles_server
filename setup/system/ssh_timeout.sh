@@ -19,7 +19,7 @@ echo ''
 
 echo '1️⃣ Setting TMOUT for all users...'
 
-# Add TMOUT to /etc/profile.d/ for all users
+# Add TMOUT to /etc/profile.d/ for bash users
 sudo tee /etc/profile.d/ssh-timeout.sh > /dev/null <<EOF
 # Auto logout after 5 minutes of inactivity
 TMOUT=$TIMEOUT_SECONDS
@@ -28,7 +28,7 @@ export TMOUT
 EOF
 
 sudo chmod +x /etc/profile.d/ssh-timeout.sh
-echo '✓ Created /etc/profile.d/ssh-timeout.sh'
+echo '✓ Created /etc/profile.d/ssh-timeout.sh (for bash)'
 
 # Also add to /etc/profile for compatibility
 if ! grep -q "^TMOUT=" /etc/profile 2>/dev/null; then
@@ -40,6 +40,54 @@ if ! grep -q "^TMOUT=" /etc/profile 2>/dev/null; then
     echo '✓ Added TMOUT to /etc/profile'
 else
     echo '✓ TMOUT already exists in /etc/profile'
+fi
+
+# Add TMOUT for ZSH users - ZSH doesn't load /etc/profile.d/ by default
+echo ''
+echo '1️⃣.1 Setting TMOUT for ZSH users...'
+
+# Create /etc/zsh directory if not exists
+sudo mkdir -p /etc/zsh
+
+# Add to /etc/zsh/zshenv (loaded for all zsh sessions)
+if ! grep -q "^TMOUT=" /etc/zsh/zshenv 2>/dev/null; then
+    sudo tee -a /etc/zsh/zshenv > /dev/null <<EOF
+
+# Auto logout after 5 minutes of inactivity
+TMOUT=$TIMEOUT_SECONDS
+readonly TMOUT
+export TMOUT
+EOF
+    echo '✓ Added TMOUT to /etc/zsh/zshenv'
+else
+    echo '✓ TMOUT already exists in /etc/zsh/zshenv'
+fi
+
+# Also add to /etc/zsh/zshrc for interactive shells
+if ! grep -q "^TMOUT=" /etc/zsh/zshrc 2>/dev/null; then
+    sudo tee -a /etc/zsh/zshrc > /dev/null <<EOF
+
+# Auto logout after 5 minutes of inactivity
+TMOUT=$TIMEOUT_SECONDS
+readonly TMOUT
+export TMOUT
+EOF
+    echo '✓ Added TMOUT to /etc/zsh/zshrc'
+else
+    echo '✓ TMOUT already exists in /etc/zsh/zshrc'
+fi
+
+# Add to /etc/skel/.zshrc for new users
+if [ -f /etc/skel/.zshrc ]; then
+    if ! grep -q "^TMOUT=" /etc/skel/.zshrc 2>/dev/null; then
+        sudo tee -a /etc/skel/.zshrc > /dev/null <<EOF
+
+# Auto logout after 5 minutes of inactivity
+TMOUT=$TIMEOUT_SECONDS
+export TMOUT
+EOF
+        echo '✓ Added TMOUT to /etc/skel/.zshrc'
+    fi
 fi
 
 # ============ Method 2: ClientAlive (Network keepalive) ============
@@ -95,4 +143,5 @@ echo '   - Test: open new SSH, do nothing for 5 minutes'
 echo ''
 echo '🔍 Verify:'
 echo '   echo \$TMOUT    # Should show 300'
-echo '   grep TMOUT /etc/profile.d/ssh-timeout.sh'
+echo '   grep TMOUT /etc/profile.d/ssh-timeout.sh  # For bash'
+echo '   grep TMOUT /etc/zsh/zshenv               # For zsh'
