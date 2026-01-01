@@ -21,7 +21,9 @@ echo '1️⃣ Setting TMOUT for all users...'
 
 # Remove old TMOUT entries to avoid duplicates and readonly errors
 sudo sed -i '/TMOUT/d' /etc/profile 2>/dev/null
+sudo sed -i '/TMOUT/d' /etc/bash.bashrc 2>/dev/null
 sudo sed -i '/Auto logout after/d' /etc/profile 2>/dev/null
+sudo sed -i '/Auto logout after/d' /etc/bash.bashrc 2>/dev/null
 sudo rm -f /etc/profile.d/ssh-timeout.sh 2>/dev/null
 
 # Add TMOUT to /etc/profile.d/ for bash users (ONLY place for bash)
