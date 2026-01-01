@@ -193,7 +193,7 @@ install_zabbix_server() {
         echo "No web server detected. Please choose:"
         echo "  1) Nginx (recommended, lightweight)"
         echo "  2) Apache (traditional)"
-        read -p "Enter choice [1-2]: " choice
+        read -r -p "Enter choice [1-2]: " choice
 
         case "$choice" in
             1)
