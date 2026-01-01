@@ -147,11 +147,57 @@ install_zabbix_server() {
                 print_info "Installing MySQL server..."
                 DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
 
-                # Verify installation
+                # Create default MySQL config if missing
+                if [ ! -f /etc/mysql/my.cnf ]; then
+                    print_info "Creating MySQL default configuration..."
+                    mkdir -p /etc/mysql/conf.d /etc/mysql/mysql.conf.d
+                    tee /etc/mysql/my.cnf > /dev/null <<'EOFMYSQL'
+# MySQL default configuration
+[client]
+port = 3306
+socket = /var/run/mysqld/mysqld.sock
+
+[mysqld]
+port = 3306
+socket = /var/run/mysqld/mysqld.sock
+pid-file = /var/run/mysqld/mysqld.pid
+datadir = /var/lib/mysql
+bind-address = 127.0.0.1
+log-error = /var/log/mysql/error.log
+
+!includedir /etc/mysql/conf.d/
+!includedir /etc/mysql/mysql.conf.d/
+EOFMYSQL
+                    print_success "MySQL configuration created"
+                fi
+
+                # Initialize MySQL data directory if needed
+                if [ ! -d /var/lib/mysql/mysql ]; then
+                    print_info "Initializing MySQL data directory..."
+                    mkdir -p /var/lib/mysql
+                    chown -R mysql:mysql /var/lib/mysql
+                    mysqld --initialize-insecure --user=mysql 2>/dev/null || true
+                fi
+
+                # Create log directory
+                mkdir -p /var/log/mysql
+                chown -R mysql:adm /var/log/mysql
+
+                # Verify installation and start
                 if dpkg -l | grep -q "^ii.*mysql-server"; then
+                    print_info "Starting MySQL..."
                     systemctl start mysql
                     systemctl enable mysql
-                    print_success "MySQL installed and started"
+
+                    # Wait for MySQL to start
+                    sleep 3
+
+                    if systemctl is-active --quiet mysql; then
+                        print_success "MySQL installed and started"
+                    else
+                        print_error "MySQL failed to start, checking logs..."
+                        journalctl -u mysql -n 20 --no-pager
+                    fi
                 else
                     print_error "MySQL installation failed, trying to fix..."
                     apt-get install -f -y
@@ -171,7 +217,44 @@ install_zabbix_server() {
     else
         # Install MySQL - no existing database
         print_info "Installing MySQL server..."
-        apt-get install -y mysql-server
+        DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
+
+        # Create default MySQL config if missing
+        if [ ! -f /etc/mysql/my.cnf ]; then
+            print_info "Creating MySQL default configuration..."
+            mkdir -p /etc/mysql/conf.d /etc/mysql/mysql.conf.d
+            tee /etc/mysql/my.cnf > /dev/null <<'EOFMYSQL'
+# MySQL default configuration
+[client]
+port = 3306
+socket = /var/run/mysqld/mysqld.sock
+
+[mysqld]
+port = 3306
+socket = /var/run/mysqld/mysqld.sock
+pid-file = /var/run/mysqld/mysqld.pid
+datadir = /var/lib/mysql
+bind-address = 127.0.0.1
+log-error = /var/log/mysql/error.log
+
+!includedir /etc/mysql/conf.d/
+!includedir /etc/mysql/mysql.conf.d/
+EOFMYSQL
+            print_success "MySQL configuration created"
+        fi
+
+        # Initialize MySQL data directory if needed
+        if [ ! -d /var/lib/mysql/mysql ]; then
+            print_info "Initializing MySQL data directory..."
+            mkdir -p /var/lib/mysql
+            chown -R mysql:mysql /var/lib/mysql
+            mysqld --initialize-insecure --user=mysql 2>/dev/null || true
+        fi
+
+        # Create log directory
+        mkdir -p /var/log/mysql
+        chown -R mysql:adm /var/log/mysql
+
         systemctl start mysql
         systemctl enable mysql
         print_success "MySQL installed and started"
