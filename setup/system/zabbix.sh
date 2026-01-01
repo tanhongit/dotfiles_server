@@ -94,7 +94,7 @@ install_zabbix_server() {
         echo "  1) Use existing ${DB_TYPE} (recommended if working)"
         echo "  2) Remove ${DB_TYPE} and install fresh MySQL 8.0"
         echo "  3) Cancel installation"
-        read -p "Enter choice [1-3]: " db_choice
+        read -r -p "Enter choice [1-3]: " db_choice
 
         case "$db_choice" in
             1)
@@ -320,7 +320,7 @@ install_zabbix_agent() {
     echo ''
 
     # Get Zabbix server address from user
-    read -p "Enter Zabbix Server IP address: " ZABBIX_SERVER_IP
+    read -r -p "Enter Zabbix Server IP address: " ZABBIX_SERVER_IP
 
     if [ -z "$ZABBIX_SERVER_IP" ]; then
         print_error "Zabbix Server IP is required"
