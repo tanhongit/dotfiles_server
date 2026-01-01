@@ -114,22 +114,50 @@ install_zabbix_server() {
                 # Remove frozen file if exists
                 rm -f /etc/mysql/FROZEN
 
-                # Purge old installations
-                apt-get remove --purge -y mariadb-server mariadb-client mysql-server mysql-client 2>/dev/null || true
-                apt-get autoremove -y
+                # Fix broken packages first
+                print_info "Fixing broken packages..."
+                dpkg --configure -a 2>/dev/null || true
+                apt-get install -f -y 2>/dev/null || true
 
-                # Clean up config files
+                # Purge old installations completely
+                print_info "Purging old database packages..."
+                apt-get remove --purge -y mariadb-server* mariadb-client* mariadb-common* \
+                    mysql-server* mysql-client* mysql-common* 2>/dev/null || true
+
+                # Clean up residual config
+                dpkg --purge mariadb-server mariadb-client mariadb-common \
+                    mysql-server mysql-client mysql-common 2>/dev/null || true
+
+                apt-get autoremove -y
+                apt-get autoclean
+
+                # Clean up config files and data
+                print_info "Cleaning up configuration and data..."
                 rm -rf /etc/mysql
                 rm -rf /var/lib/mysql
+                rm -rf /var/log/mysql
+                rm -rf /etc/mysql/FROZEN
 
-                print_success "Old database removed"
+                print_success "Old database removed completely"
 
-                # Install MySQL
+                # Update package lists
+                apt-get update -qq
+
+                # Install MySQL fresh
                 print_info "Installing MySQL server..."
-                apt-get install -y mysql-server
-                systemctl start mysql
-                systemctl enable mysql
-                print_success "MySQL installed and started"
+                DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
+
+                # Verify installation
+                if dpkg -l | grep -q "^ii.*mysql-server"; then
+                    systemctl start mysql
+                    systemctl enable mysql
+                    print_success "MySQL installed and started"
+                else
+                    print_error "MySQL installation failed, trying to fix..."
+                    apt-get install -f -y
+                    dpkg --configure -a
+                    systemctl start mysql 2>/dev/null || true
+                fi
                 ;;
             3)
                 print_error "Installation cancelled"

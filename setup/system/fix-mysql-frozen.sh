@@ -37,8 +37,15 @@ case "$choice" in
         systemctl stop mysql 2>/dev/null || true
         systemctl stop mariadb 2>/dev/null || true
 
+        echo "➜ Fixing broken packages..."
+        dpkg --configure -a 2>/dev/null || true
+        apt-get install -f -y 2>/dev/null || true
+
         echo "➜ Removing packages..."
-        apt-get remove --purge -y mariadb-server mariadb-client mariadb-common \
+        apt-get remove --purge -y mariadb-server* mariadb-client* mariadb-common* \
+            mysql-server* mysql-client* mysql-common* 2>/dev/null || true
+
+        dpkg --purge mariadb-server mariadb-client mariadb-common \
             mysql-server mysql-client mysql-common 2>/dev/null || true
 
         echo "➜ Cleaning up files..."
@@ -48,14 +55,15 @@ case "$choice" in
 
         echo "➜ Removing auto-installed packages..."
         apt-get autoremove -y
+        apt-get autoclean
 
         echo ""
         echo "✅ Cleanup complete!"
         echo ""
         echo "📌 Next steps:"
         echo "   1. Run: apt-get update"
-        echo "   2. Install MySQL: apt-get install -y mysql-server"
-        echo "   3. Or run Zabbix installation again"
+        echo "   2. Install MySQL: DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server"
+        echo "   3. Or run Zabbix installation again: bash install.sh zabbix_server"
         ;;
     2)
         echo ""
