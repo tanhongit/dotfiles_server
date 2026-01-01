@@ -114,6 +114,6 @@ echo '   - Current session needs to logout and login again'
 echo '   - Test: open new SSH, do nothing for 5 minutes'
 echo ''
 echo '🔍 Verify:'
-echo '   echo \$TMOUT    # Should show 300'
+echo "   echo \$TMOUT    # Should show 300"
 echo '   grep TMOUT /etc/profile.d/ssh-timeout.sh  # For bash'
 echo '   grep TMOUT /etc/zsh/zshenv               # For zsh'
