@@ -3,8 +3,9 @@
 # ======================== Zabbix Setup ========================
 # Setup Zabbix Server or Zabbix Agent
 # Usage:
-#   ./zabbix.sh server   # Install Zabbix Server
-#   ./zabbix.sh client   # Install Zabbix Agent
+#   ./zabbix.sh server                 # Install Zabbix Server
+#   ./zabbix.sh client                 # Install Zabbix Agent (will prompt for IP)
+#   ./zabbix.sh client 192.168.1.100   # Install Zabbix Agent with Server IP
 
 set -e
 
@@ -80,9 +81,50 @@ install_zabbix_server() {
     systemctl enable mysql
     print_success "MySQL installed and started"
 
-    # Install Zabbix server, frontend, agent
+    # Detect or choose web server
+    print_info "Detecting web server..."
+    WEB_SERVER=""
+
+    if systemctl is-active --quiet nginx; then
+        WEB_SERVER="nginx"
+        print_info "Nginx detected, will use Nginx"
+    elif systemctl is-active --quiet apache2; then
+        WEB_SERVER="apache"
+        print_info "Apache detected, will use Apache"
+    else
+        # Ask user to choose
+        echo ""
+        echo "No web server detected. Please choose:"
+        echo "  1) Nginx (recommended, lightweight)"
+        echo "  2) Apache (traditional)"
+        read -p "Enter choice [1-2]: " choice
+
+        case "$choice" in
+            1)
+                WEB_SERVER="nginx"
+                print_info "Selected: Nginx"
+                ;;
+            2)
+                WEB_SERVER="apache"
+                print_info "Selected: Apache"
+                ;;
+            *)
+                print_error "Invalid choice"
+                exit 1
+                ;;
+        esac
+    fi
+
+    # Install Zabbix server, frontend, agent based on web server
     print_info "Installing Zabbix Server, Frontend, Agent..."
-    apt-get install -y zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent
+
+    if [ "$WEB_SERVER" = "nginx" ]; then
+        apt-get install -y zabbix-server-mysql zabbix-frontend-php zabbix-nginx-conf zabbix-sql-scripts zabbix-agent php-fpm
+        print_success "Installed Zabbix with Nginx support"
+    else
+        apt-get install -y zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent
+        print_success "Installed Zabbix with Apache support"
+    fi
 
     # Create Zabbix database
     print_info "Setting up Zabbix database..."
@@ -150,6 +192,7 @@ EOF
 
         # Start and enable services
         print_info "Starting Zabbix services..."
+        systemctl restart zabbix-server zabbix-agent php8.4-fpm nginx 2>/dev/null || \
         systemctl restart zabbix-server zabbix-agent php8.3-fpm nginx 2>/dev/null || \
         systemctl restart zabbix-server zabbix-agent php8.1-fpm nginx 2>/dev/null || \
         systemctl restart zabbix-server zabbix-agent php-fpm nginx
@@ -287,15 +330,20 @@ install_zabbix_agent() {
 
 # Show usage
 show_usage() {
-    echo "Usage: $0 [server|client]"
+    echo "Usage: $0 [server|client] [server_ip]"
     echo ""
     echo "Options:"
-    echo "  server    Install Zabbix Server with web interface"
-    echo "  client    Install Zabbix Agent (client)"
+    echo "  server              Install Zabbix Server with web interface"
+    echo "  client [server_ip]  Install Zabbix Agent (client)"
+    echo ""
+    echo "Arguments:"
+    echo "  server_ip           Zabbix Server IP (optional for client)"
+    echo "                      If not provided, will prompt for input"
     echo ""
     echo "Examples:"
-    echo "  $0 server    # Install Zabbix Server"
-    echo "  $0 client    # Install Zabbix Agent"
+    echo "  $0 server                    # Install Zabbix Server"
+    echo "  $0 client                    # Install Agent (will ask for IP)"
+    echo "  $0 client 192.168.1.100      # Install Agent with Server IP"
     echo ""
 }
 

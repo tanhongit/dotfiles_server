@@ -93,13 +93,20 @@ Features:
 - ✓ Generates secure random passwords
 - ✓ Configures firewall automatically
 - ✓ Supports Ubuntu 20.04, 22.04, 24.04
+- ✓ Zabbix 7.0 LTS
 
 **Install Zabbix Agent (Client):**
 
 ```bash
+# Method 1: Will prompt for Server IP
 sudo bash install.sh zabbix_client
 # or
 sudo bash install.sh zc
+
+# Method 2: Pass Server IP directly
+sudo bash install.sh zabbix_client 192.168.1.100
+# or
+sudo bash install.sh zc 192.168.1.100
 ```
 
 Features:

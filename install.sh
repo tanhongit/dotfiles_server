@@ -90,6 +90,9 @@ usage() {
     echo "  bash $0 lazydocker"
     echo "  bash $0 global_dev"
     echo "  bash $0 global_dev -f"
+    echo "  bash $0 zabbix_server"
+    echo "  bash $0 zabbix_client"
+    echo "  bash $0 zabbix_client 192.168.1.100"
     echo ''
 }
 
@@ -127,7 +130,7 @@ case "${1:-}" in
         ;;
 
     zabbix_client | zc)
-        zabbix_client
+        zabbix_client "$@"
         ;;
 
     *)
