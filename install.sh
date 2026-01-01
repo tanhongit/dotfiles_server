@@ -60,6 +60,20 @@ global_dev_setup() {
     fi
 }
 
+zabbix_server() {
+    cd "$CURRENT_DIR/setup/system" || exit
+    sudo bash zabbix.sh server
+}
+
+zabbix_client() {
+    cd "$CURRENT_DIR/setup/system" || exit
+    if [ -n "${2:-}" ]; then
+        sudo bash zabbix.sh client "${2}"
+    else
+        sudo bash zabbix.sh client
+    fi
+}
+
 usage() {
     echo "Usage: bash $0 [command] [args]"
     echo ''
@@ -71,6 +85,8 @@ usage() {
     echo '  php_extension   Install php extension'
     echo '  lazydocker      Install lazydocker'
     echo '  global_dev      Setup NVM, NPM, Yarn, ZSH globally for all users'
+    echo '  zabbix_server   Install Zabbix Server (auto-detect Nginx/Apache)'
+    echo '  zabbix_client   Install Zabbix Agent (client) [server_ip]'
     echo ''
     echo 'Args for global_dev:'
     echo '  -f, --force     Force copy/update dotfiles to all existing users'
@@ -80,6 +96,9 @@ usage() {
     echo ''
     echo 'Args for php_extension:'
     echo '  [version]       PHP version (valid version number)'
+    echo ''
+    echo 'Args for zabbix_client:'
+    echo '  [server_ip]     Zabbix Server IP (optional, will prompt if not provided)'
     echo ''
     echo 'Example:'
     echo "  bash $0 setup"
