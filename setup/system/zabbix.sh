@@ -74,12 +74,80 @@ install_zabbix_server() {
     apt-get update -qq
     print_success "Zabbix repository added"
 
-    # Install MySQL
-    print_info "Installing MySQL server..."
-    apt-get install -y mysql-server
-    systemctl start mysql
-    systemctl enable mysql
-    print_success "MySQL installed and started"
+    # Check for existing database installations
+    print_info "Checking for existing database installations..."
+    DB_INSTALLED=false
+    DB_TYPE=""
+
+    if dpkg -l | grep -q "^ii.*mariadb-server"; then
+        DB_INSTALLED=true
+        DB_TYPE="MariaDB"
+    elif dpkg -l | grep -q "^ii.*mysql-server"; then
+        DB_INSTALLED=true
+        DB_TYPE="MySQL"
+    fi
+
+    if [ "$DB_INSTALLED" = true ]; then
+        print_info "${DB_TYPE} is already installed"
+        echo ""
+        echo "Choose an option:"
+        echo "  1) Use existing ${DB_TYPE} (recommended if working)"
+        echo "  2) Remove ${DB_TYPE} and install fresh MySQL 8.0"
+        echo "  3) Cancel installation"
+        read -p "Enter choice [1-3]: " db_choice
+
+        case "$db_choice" in
+            1)
+                print_info "Using existing ${DB_TYPE}"
+                # Check if database is running
+                if ! systemctl is-active --quiet mysql && ! systemctl is-active --quiet mariadb; then
+                    print_info "Starting database service..."
+                    systemctl start mysql 2>/dev/null || systemctl start mariadb 2>/dev/null || true
+                fi
+                ;;
+            2)
+                print_info "Removing existing ${DB_TYPE}..."
+                # Stop services
+                systemctl stop mysql 2>/dev/null || true
+                systemctl stop mariadb 2>/dev/null || true
+
+                # Remove frozen file if exists
+                rm -f /etc/mysql/FROZEN
+
+                # Purge old installations
+                apt-get remove --purge -y mariadb-server mariadb-client mysql-server mysql-client 2>/dev/null || true
+                apt-get autoremove -y
+
+                # Clean up config files
+                rm -rf /etc/mysql
+                rm -rf /var/lib/mysql
+
+                print_success "Old database removed"
+
+                # Install MySQL
+                print_info "Installing MySQL server..."
+                apt-get install -y mysql-server
+                systemctl start mysql
+                systemctl enable mysql
+                print_success "MySQL installed and started"
+                ;;
+            3)
+                print_error "Installation cancelled"
+                exit 1
+                ;;
+            *)
+                print_error "Invalid choice"
+                exit 1
+                ;;
+        esac
+    else
+        # Install MySQL - no existing database
+        print_info "Installing MySQL server..."
+        apt-get install -y mysql-server
+        systemctl start mysql
+        systemctl enable mysql
+        print_success "MySQL installed and started"
+    fi
 
     # Detect or choose web server
     print_info "Detecting web server..."

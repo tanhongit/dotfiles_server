@@ -152,6 +152,10 @@ case "${1:-}" in
         zabbix_client "$@"
         ;;
 
+    fix_mysql | fix_mysql_frozen | fmf)
+        fix_mysql_frozen
+        ;;
+
     *)
         usage
         exit 1

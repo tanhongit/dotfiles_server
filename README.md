@@ -34,15 +34,18 @@ cd dotfiles_server
 
 The runner has the following commands:
 
-| Command               | Description                                                        |
-|-----------------------|--------------------------------------------------------------------|
-| `setup`, `s`, `a`     | Setup the server                                                   |
-| `ssh_port`, `sp`      | Change the SSH port                                                |
-| `ssh_timeout`, `st`   | Configure SSH timeout (auto disconnect after 5min idle)            |
-| `php`, `php-install`  | Install PHP version you want                                       |
-| `php_extension`, `pe` | Install PHP extensions                                             |
-| `lazydocker`, `ld`    | Install lazydocker                                                 |
-| `global_dev`, `gd`    | Setup NVM, NPM, Yarn, ZSH globally for all users                   |
+| Command               | Description                                             |
+|-----------------------|---------------------------------------------------------|
+| `setup`, `s`, `a`     | Setup the server                                        |
+| `ssh_port`, `sp`      | Change the SSH port                                     |
+| `ssh_timeout`, `st`   | Configure SSH timeout (auto disconnect after 5min idle) |
+| `php`, `php-install`  | Install PHP version you want                            |
+| `php_extension`, `pe` | Install PHP extensions                                  |
+| `lazydocker`, `ld`    | Install lazydocker                                      |
+| `global_dev`, `gd`    | Setup NVM, NPM, Yarn, ZSH globally for all users        |
+| `zabbix_server`, `zs` | Install Zabbix Server with auto web server detection    |
+| `zabbix_client`, `zc` | Install Zabbix Agent (client)                           |
+| `fix_mysql`, `fmf`    | Fix MySQL FROZEN issue (when downgrading from MariaDB)  |
 
 ### Global Dev Setup
 
