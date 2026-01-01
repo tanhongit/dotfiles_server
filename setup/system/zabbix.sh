@@ -450,6 +450,12 @@ EOF
     echo '   /root/.zabbix_db_password'
     echo '   /root/.mysql_root_password'
     echo ''
+    echo '📌 Zabbix root directory: /usr/share/zabbix'
+    echo ''
+    echo '📌 Zabbix server configuration: /etc/zabbix/zabbix_server.conf'
+    echo ''
+    echo '📌 Zabbix agent configuration: /etc/zabbix/zabbix_agentd.conf'
+    echo ''
     if [ "$WEB_SERVER" = "nginx" ]; then
         echo '📌 Nginx configuration: /etc/zabbix/nginx.conf'
         echo ''
@@ -470,6 +476,8 @@ EOF
         echo '   ss -tlnp | grep apache'
         echo ''
     fi
+    echo '=========================================='
+    echo ''
 }
 
 # Install Zabbix Agent
