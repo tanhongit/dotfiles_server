@@ -75,3 +75,29 @@ while true; do
     *) echo "Please answer yes or no." ;;
     esac
 done
+
+echo ''
+echo "####################################################################"
+echo "####################### install Zabbix #############################"
+echo "####################################################################"
+echo ''
+while true; do
+    read -r -p "Do you want to install Zabbix? (server/client/no)  " zabbix_choice
+    case $zabbix_choice in
+    [Ss][Ee][Rr][Vv][Ee][Rr]|server)
+        cd "$THIS_DIR"/setup/system/ || exit
+        sudo bash zabbix.sh server
+        cd "$THIS_DIR" || exit
+        break
+        ;;
+    [Cc][Ll][Ii][Ee][Nn][Tt]|client)
+        cd "$THIS_DIR"/setup/system/ || exit
+        sudo bash zabbix.sh client
+        cd "$THIS_DIR" || exit
+        break
+        ;;
+    [Nn][Oo]|no|n) break ;;
+    *) echo "Please answer server, client, or no." ;;
+    esac
+done
+

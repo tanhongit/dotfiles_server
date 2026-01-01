@@ -122,6 +122,14 @@ case "${1:-}" in
         global_dev_setup "$@"
         ;;
 
+    zabbix_server | zs)
+        zabbix_server
+        ;;
+
+    zabbix_client | zc)
+        zabbix_client
+        ;;
+
     *)
         usage
         exit 1

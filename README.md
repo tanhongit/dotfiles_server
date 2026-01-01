@@ -74,6 +74,40 @@ The `-f` or `--force` flag will:
 - Backup existing dotfiles before updating
 - Apply new configuration to all users with UID >= 1000
 
+### Zabbix Setup
+
+Setup Zabbix monitoring system with automatic web server detection:
+
+**Install Zabbix Server:**
+
+```bash
+sudo bash install.sh zabbix_server
+# or
+sudo bash install.sh zs
+```
+
+Features:
+- ✓ Auto-detects Nginx or Apache (or lets you choose)
+- ✓ Installs MySQL database
+- ✓ Configures Zabbix Server, Frontend, and Agent
+- ✓ Generates secure random passwords
+- ✓ Configures firewall automatically
+- ✓ Supports Ubuntu 20.04, 22.04, 24.04
+
+**Install Zabbix Agent (Client):**
+
+```bash
+sudo bash install.sh zabbix_client
+# or
+sudo bash install.sh zc
+```
+
+Features:
+- ✓ Installs Zabbix Agent
+- ✓ Prompts for Zabbix Server IP
+- ✓ Configures agent to connect to server
+- ✓ Configures firewall automatically
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
