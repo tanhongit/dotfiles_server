@@ -404,8 +404,41 @@ EOF
     echo '=========================================='
     echo ''
     echo "📌 Web Server: ${WEB_SERVER}"
+
+    # Detect actual listening port
+    if command -v ss &>/dev/null; then
+        NGINX_PORT=$(ss -tlnp | grep nginx | grep -oP ':\K[0-9]+' | head -1)
+        APACHE_PORT=$(ss -tlnp | grep apache | grep -oP ':\K[0-9]+' | head -1)
+    else
+        NGINX_PORT=$(netstat -tlnp 2>/dev/null | grep nginx | grep -oP ':\K[0-9]+' | head -1)
+        APACHE_PORT=$(netstat -tlnp 2>/dev/null | grep apache | grep -oP ':\K[0-9]+' | head -1)
+    fi
+
+    if [ "$WEB_SERVER" = "nginx" ] && [ -n "$NGINX_PORT" ]; then
+        echo "📌 Nginx listening on port: ${NGINX_PORT}"
+    elif [ "$WEB_SERVER" = "apache" ] && [ -n "$APACHE_PORT" ]; then
+        echo "📌 Apache listening on port: ${APACHE_PORT}"
+    fi
+
     echo '📌 Access Zabbix Web Interface:'
-    echo "   http://$(hostname -I | awk '{print $1}')/zabbix"
+    SERVER_IP=$(hostname -I | awk '{print $1}')
+
+    if [ "$WEB_SERVER" = "nginx" ] && [ -n "$NGINX_PORT" ]; then
+        if [ "$NGINX_PORT" = "80" ]; then
+            echo "   http://${SERVER_IP}/zabbix"
+        else
+            echo "   http://${SERVER_IP}:${NGINX_PORT}/zabbix"
+        fi
+    elif [ "$WEB_SERVER" = "apache" ] && [ -n "$APACHE_PORT" ]; then
+        if [ "$APACHE_PORT" = "80" ]; then
+            echo "   http://${SERVER_IP}/zabbix"
+        else
+            echo "   http://${SERVER_IP}:${APACHE_PORT}/zabbix"
+        fi
+    else
+        echo "   http://${SERVER_IP}/zabbix"
+    fi
+
     echo ''
     echo '📌 Default credentials:'
     echo '   Username: Admin'
@@ -419,6 +452,22 @@ EOF
     echo ''
     if [ "$WEB_SERVER" = "nginx" ]; then
         echo '📌 Nginx configuration: /etc/zabbix/nginx.conf'
+        echo ''
+        echo '🔍 Check Nginx status:'
+        echo '   systemctl status nginx'
+        echo '   ss -tlnp | grep nginx'
+        echo ''
+        echo '📝 If Zabbix not accessible, check Nginx config:'
+        echo '   sudo nginx -t'
+        echo '   cat /etc/zabbix/nginx.conf'
+        echo '   ls -la /etc/nginx/sites-enabled/ | grep zabbix'
+        echo ''
+    else
+        echo '📌 Apache configuration: /etc/apache2/conf-enabled/zabbix.conf'
+        echo ''
+        echo '🔍 Check Apache status:'
+        echo '   systemctl status apache2'
+        echo '   ss -tlnp | grep apache'
         echo ''
     fi
 }
