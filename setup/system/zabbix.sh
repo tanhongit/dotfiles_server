@@ -39,6 +39,45 @@ check_root() {
     fi
 }
 
+# Detect installed PHP-FPM service
+detect_php_fpm() {
+    local php_fpm_service=""
+
+    # Check for installed PHP-FPM services (newest to oldest)
+    for php_version in 8.5 8.4 8.3 8.2 8.1 8.0 7.4; do
+        if systemctl list-units --all | grep -q "php${php_version}-fpm.service"; then
+            php_fpm_service="php${php_version}-fpm"
+            break
+        fi
+    done
+
+    # Fallback to generic php-fpm
+    if [ -z "$php_fpm_service" ] && systemctl list-units --all | grep -q "php-fpm.service"; then
+        php_fpm_service="php-fpm"
+    fi
+
+    echo "$php_fpm_service"
+}
+
+# Get PHP-FPM socket path
+get_php_fpm_socket() {
+    local php_fpm_service="$1"
+    local socket_path=""
+
+    if [ -n "$php_fpm_service" ]; then
+        # Extract version from service name (e.g., php8.3-fpm -> 8.3)
+        local version=$(echo "$php_fpm_service" | grep -oP '\d+\.\d+')
+
+        if [ -n "$version" ]; then
+            socket_path="/run/php/php${version}-fpm.sock"
+        else
+            socket_path="/run/php/php-fpm.sock"
+        fi
+    fi
+
+    echo "$socket_path"
+}
+
 # Install Zabbix Server
 install_zabbix_server() {
     echo '=========================================='
@@ -353,9 +392,24 @@ EOF
     if [ "$WEB_SERVER" = "nginx" ]; then
         print_info "Configuring Nginx..."
 
+        # Detect PHP-FPM version first
+        PHP_FPM_SERVICE=$(detect_php_fpm)
+
+        if [ -n "$PHP_FPM_SERVICE" ]; then
+            PHP_FPM_SOCKET=$(get_php_fpm_socket "$PHP_FPM_SERVICE")
+            print_info "Using PHP-FPM socket: ${PHP_FPM_SOCKET}"
+        else
+            print_error "PHP-FPM not detected, using default socket"
+            PHP_FPM_SOCKET="/run/php/php-fpm.sock"
+        fi
+
         # Update Nginx config for Zabbix
         sed -i 's/# listen 8080;/listen 80;/' /etc/zabbix/nginx.conf
         sed -i 's/# server_name example.com;/server_name _;/' /etc/zabbix/nginx.conf
+
+        # Update PHP-FPM socket in Nginx config (handle different possible formats)
+        sed -i "s|fastcgi_pass unix:/run/php/php[0-9.]*-fpm.sock;|fastcgi_pass unix:${PHP_FPM_SOCKET};|g" /etc/zabbix/nginx.conf
+        sed -i "s|fastcgi_pass unix:/run/php/php-fpm.sock;|fastcgi_pass unix:${PHP_FPM_SOCKET};|g" /etc/zabbix/nginx.conf
 
         # Create symlink if not exists
         if [ ! -L /etc/nginx/sites-enabled/zabbix ]; then
@@ -371,13 +425,17 @@ EOF
 
         # Start and enable services
         print_info "Starting Zabbix services..."
-        systemctl restart zabbix-server zabbix-agent php8.4-fpm nginx 2>/dev/null || \
-        systemctl restart zabbix-server zabbix-agent php8.3-fpm nginx 2>/dev/null || \
-        systemctl restart zabbix-server zabbix-agent php8.1-fpm nginx 2>/dev/null || \
-        systemctl restart zabbix-server zabbix-agent php-fpm nginx
 
-        systemctl enable zabbix-server zabbix-agent nginx
-        print_success "Zabbix services started and enabled (Nginx)"
+        if [ -n "$PHP_FPM_SERVICE" ]; then
+            systemctl restart zabbix-server zabbix-agent "$PHP_FPM_SERVICE" nginx
+            systemctl enable zabbix-server zabbix-agent "$PHP_FPM_SERVICE" nginx
+            print_success "Zabbix services started and enabled (Nginx with ${PHP_FPM_SERVICE})"
+        else
+            print_error "PHP-FPM not found, starting without it"
+            systemctl restart zabbix-server zabbix-agent nginx
+            systemctl enable zabbix-server zabbix-agent nginx
+            print_success "Zabbix services started and enabled (Nginx, PHP-FPM may need manual setup)"
+        fi
     else
         print_info "Configuring Apache..."
 
