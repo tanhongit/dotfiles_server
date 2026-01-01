@@ -74,6 +74,11 @@ zabbix_client() {
     fi
 }
 
+fix_mysql_frozen() {
+    cd "$CURRENT_DIR/setup/system" || exit
+    sudo bash fix-mysql-frozen.sh
+}
+
 usage() {
     echo "Usage: bash $0 [command] [args]"
     echo ''
@@ -112,6 +117,7 @@ usage() {
     echo "  bash $0 zabbix_server"
     echo "  bash $0 zabbix_client"
     echo "  bash $0 zabbix_client 192.168.1.100"
+    echo "  bash $0 fix_mysql"
     echo ''
 }
 
