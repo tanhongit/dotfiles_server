@@ -36,7 +36,12 @@ if [ "$EUID" -ne 0 ]; then
     echo "⚠️  Warning: This script should be run with sudo for full functionality"
     echo "Some features may not work without root privileges."
     echo ""
-    read -p "Continue anyway? (y/n) " -n 1 -r
+    if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
+        echo "Continuing in non-root mode as per prior confirmation..."
+    else
+        read -p "Continue anyway? (y/n) " -n 1 -r
+    fi
+
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         exit 1

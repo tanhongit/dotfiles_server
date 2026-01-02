@@ -28,6 +28,7 @@ echo "Choose an option:"
 echo "  1) Remove MySQL/MariaDB and clean everything (recommended)"
 echo "  2) Just remove FROZEN file (risky, may cause data corruption)"
 echo "  3) Cancel"
+
 read -r -p "Enter choice [1-3]: " choice
 
 case "$choice" in

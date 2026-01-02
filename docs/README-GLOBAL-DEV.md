@@ -1,269 +1,411 @@
-# Global Development Environment Setup
+# Global Development Setup Guide
 
-Scripts để cài đặt và cấu hình môi trường development (NVM, Node.js, NPM, Yarn, ZSH) cho tất cả user trên server, bao gồm cả user mới tạo trong tương lai.
+## Overview
 
-## 🚀 Tính năng
+This guide explains how to setup and manage global development tools (NVM, NPM, Yarn, ZSH) for multiple users on a server.
 
-- ✅ **NVM** (Node Version Manager) cài đặt global tại `/usr/local/nvm`
-- ✅ **Node.js LTS** - Phiên bản mới nhất
-- ✅ **NPM** - Đi kèm với Node.js
-- ✅ **Yarn** - Package Manager được cài global
-- ✅ **ZSH** với Oh-My-Zsh cài đặt global tại `/usr/share/oh-my-zsh`
-- ✅ **Plugins ZSH**:
-  - fast-syntax-highlighting
-  - zsh-autosuggestions
-- ✅ **Powerlevel10k theme** - Theme đẹp và mạnh mẽ cho ZSH
-- ✅ Tự động cấu hình cho **tất cả user mới** qua `/etc/skel/`
-- ✅ Helper script để setup cho **existing users**
-- ✅ **Force update mode** - Cập nhật dotfiles cho tất cả users hiện tại
+## Problem Statement
 
-## 📦 Cài đặt
+When installing NVM, NPM, and Yarn globally, users often encounter permission issues:
+- Cannot install Node.js versions without sudo
+- Cannot install npm/yarn packages globally without sudo
+- Each user needs their own NVM installation (wasteful)
 
-### Cách 1: Sử dụng install.sh (Khuyến nghị)
+## Solution: Shared Development Environment with Group Permissions
+
+Our setup creates a shared development environment using the `developers` group:
+
+```
+/usr/local/nvm/              # NVM installation (shared)
+├── nvm.sh                   # NVM script
+├── npm-global/              # NPM global packages (shared)
+│   ├── bin/
+│   └── lib/
+├── yarn-global/             # Yarn global packages (shared)
+└── yarn-cache/              # Yarn cache (shared)
+```
+
+All directories are owned by `root:developers` with `775` permissions and SGID bit set.
+
+## Installation
+
+### Step 1: Install Global Dev Environment
 
 ```bash
-# Chạy script setup toàn bộ
 sudo bash install.sh global_dev
-
-# Hoặc dùng alias
-sudo bash install.sh gd
-
-# Force update dotfiles cho tất cả users hiện tại
-sudo bash install.sh global_dev -f
-# hoặc
-sudo bash install.sh gd --force
 ```
 
-**Force Mode (`-f` hoặc `--force`):**
-- Tự động copy/update các dotfiles từ folder `home/` cho **tất cả users** hiện tại (UID >= 1000)
-- Backup các file config cũ trước khi update
-- Áp dụng cấu hình mới cho tất cả users
-- Files được update: `.zshrc`, `.zsh_aliases`, `.p10k.zsh`
+This will:
+1. Install ZSH with Oh-My-Zsh globally
+2. Install NVM to `/usr/local/nvm`
+3. Install latest LTS Node.js
+4. Configure NPM global directory
+5. Install Yarn globally
+6. Create `developers` group
+7. Set up proper permissions
+8. Add current user to `developers` group
 
-### Cách 2: Chạy từng script riêng lẻ
+### Step 2: Add Users to Developers Group
+
+**For specific users:**
 
 ```bash
-cd setup/packages
-
-# Setup ZSH globally
-sudo bash zsh-global.sh
-
-# Setup NVM globally
-sudo bash nvm-global.sh
-
-# Setup Yarn globally
-sudo bash yarn-global.sh
-
-# Hoặc chạy script tổng hợp
-sudo bash global-dev-setup.sh
-
-# Với force mode
-sudo bash global-dev-setup.sh --force
+sudo bash install.sh add_dev_user john
+# or multiple users
+sudo bash install.sh add_dev_user john mary bob
 ```
 
-## 🔧 Cấu hình sau khi cài đặt
-
-### Cho current user
+**For all existing users:**
 
 ```bash
-# 1. Setup ZSH cho user hiện tại
-sudo setup-zsh-user
+sudo bash install.sh add_dev_user --all
+```
 
-# 2. Đổi shell mặc định sang ZSH
-sudo chsh -s /bin/zsh $USER
+### Step 3: Force Update (Optional)
 
-# 3. Load NVM trong session hiện tại
+To update dotfiles for all existing users:
+
+```bash
+sudo bash install.sh global_dev --force
+```
+
+This will add all users to `developers` group and copy dotfiles to their home directories.
+
+## User Setup
+
+After being added to the `developers` group, users must:
+
+### Option 1: Logout and Login Again
+
+Simply logout and login again to apply group membership.
+
+### Option 2: Use newgrp Command (Immediate)
+
+```bash
+newgrp developers
 source /etc/profile.d/nvm.sh
-
-# 4. Logout và login lại để áp dụng hoàn toàn
 ```
 
-### Cho existing users khác
+## Usage Examples
+
+### For Users in Developers Group
+
+**Install a Node.js version:**
 
 ```bash
-# Setup ZSH cho user cụ thể
-sudo setup-zsh-user username
-
-# Đổi shell mặc định sang ZSH
-sudo chsh -s /bin/zsh username
+nvm install 22        # Install Node.js 22
+nvm install 20        # Install Node.js 20
+nvm use 22           # Use Node.js 22
+nvm alias default 22 # Set default to 22
 ```
 
-### Cho new users
-
-**Không cần làm gì!** User mới sẽ tự động có:
-- ZSH với Oh-My-Zsh đã cấu hình sẵn
-- NVM và Node.js sẵn sàng sử dụng
-- Tất cả plugins và theme đã được setup
-
-## 📂 Cấu trúc cài đặt
-
-```
-/usr/local/nvm/              # NVM installation directory
-├── nvm.sh                   # NVM loader script
-└── bash_completion          # Bash completion for NVM
-
-/usr/share/oh-my-zsh/        # Oh-My-Zsh global installation
-├── custom/
-│   ├── plugins/
-│   │   ├── fast-syntax-highlighting/
-│   │   └── zsh-autosuggestions/
-│   └── themes/
-│       └── powerlevel10k/
-└── ...
-
-/etc/profile.d/
-└── nvm.sh                   # Auto-load NVM for all users
-
-/etc/skel/
-├── .bashrc                  # Template for new users (with NVM)
-├── .zshrc                   # Template for new users (with ZSH config)
-└── .p10k.zsh               # Powerlevel10k config template
-
-/usr/local/bin/
-└── setup-zsh-user          # Helper script for existing users
-```
-
-## ✅ Kiểm tra cài đặt
+**Install npm packages globally:**
 
 ```bash
-# Kiểm tra NVM
-nvm --version
-# Nếu chưa có, chạy: source /etc/profile.d/nvm.sh
-
-# Kiểm tra Node.js
-node --version
-
-# Kiểm tra NPM
-npm --version
-
-# Kiểm tra Yarn
-yarn --version
-
-# Kiểm tra ZSH
-zsh --version
-
-# Kiểm tra Oh-My-Zsh
-ls -la /usr/share/oh-my-zsh
-
-# Kiểm tra shell mặc định
-echo $SHELL
+npm install -g typescript
+npm install -g @angular/cli
+npm install -g vue-cli
 ```
 
-## 🎨 Tùy chỉnh
-
-### Powerlevel10k Theme
-
-Chạy wizard để tùy chỉnh theme:
+**Install yarn packages globally:**
 
 ```bash
-p10k configure
+yarn global add create-react-app
+yarn global add gatsby-cli
 ```
 
-### Thêm plugins ZSH
-
-Edit file `~/.zshrc`:
+**List installed versions:**
 
 ```bash
-plugins=(
-    git
-    docker
-    docker-compose
-    npm
-    node
-    zsh-autosuggestions
-    fast-syntax-highlighting
-    # Thêm plugins khác tại đây
-)
+nvm list
+npm list -g --depth=0
+yarn global list
 ```
 
-### Cài thêm Node.js versions
+### For New Users
+
+New users automatically get:
+- ZSH configured with Oh-My-Zsh
+- NVM, NPM, Yarn configured in their shell
+- Dotfiles from `/etc/skel/`
+
+But they still need to be added to `developers` group:
 
 ```bash
-# List các phiên bản có sẵn
-nvm ls-remote
-
-# Cài thêm phiên bản cụ thể
-nvm install 18.20.0
-
-# Chuyển đổi giữa các phiên bản
-nvm use 18.20.0
-
-# Set phiên bản mặc định
-nvm alias default 18.20.0
+sudo bash install.sh add_dev_user newuser
 ```
 
-### Sử dụng Yarn
+## Directory Structure and Permissions
 
-```bash
-# Kiểm tra version
-yarn --version
+```
+/usr/local/nvm/
+├── Owner: root:developers
+├── Permissions: 775 (rwxrwxr-x)
+├── SGID: Yes (new files inherit group)
+│
+├── nvm.sh (755)
+├── versions/
+│   └── node/
+│       └── v22.x.x/ (775)
+├── npm-global/
+│   ├── bin/ (775)
+│   └── lib/ (775)
+├── yarn-global/ (775)
+└── yarn-cache/ (775)
 
-# Khởi tạo project mới
-yarn init
-
-# Thêm package
-yarn add express
-
-# Cài dependencies
-yarn install
-
-# Upgrade dependencies
-yarn upgrade
+/etc/profile.d/nvm.sh        # Loads for all users (bash/sh)
+/etc/zsh/nvm.zsh             # Loads for zsh users
 ```
 
-## 🐛 Troubleshooting
+## Configuration Files
 
-### NVM command not found
+### System-wide Configuration
 
+1. `/etc/profile.d/nvm.sh` - Loaded by bash/sh users
 ```bash
-# Load NVM manually
-source /etc/profile.d/nvm.sh
-
-# Hoặc thêm vào ~/.bashrc hoặc ~/.zshrc:
 export NVM_DIR="/usr/local/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+export NPM_GLOBAL_DIR="/usr/local/nvm/npm-global"
+export PATH="$NPM_GLOBAL_DIR/bin:$PATH"
 ```
 
-### ZSH không hiển thị đúng
+2. `/etc/zsh/nvm.zsh` - Loaded by zsh users
+```bash
+export NVM_DIR="/usr/local/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+export NPM_GLOBAL_DIR="/usr/local/nvm/npm-global"
+export PATH="$NPM_GLOBAL_DIR/bin:$PATH"
+```
+
+3. `/etc/skel/.zshrc` - Template for new users
+4. `/etc/skel/.bashrc` - Template for new users
+
+### User Configuration
+
+Each user's shell config (`.bashrc` or `.zshrc`) includes:
 
 ```bash
-# Kiểm tra shell hiện tại
-echo $SHELL
+# NVM configuration
+export NVM_DIR="/usr/local/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-# Nếu không phải /bin/zsh, chuyển đổi:
-sudo chsh -s /bin/zsh $USER
-
-# Logout và login lại
+# NPM global packages directory
+export NPM_GLOBAL_DIR="/usr/local/nvm/npm-global"
+export PATH="$NPM_GLOBAL_DIR/bin:$PATH"
 ```
 
-### Permissions issues
+## Troubleshooting
+
+### Permission Denied When Installing Packages
+
+**Problem:** User gets permission denied when running `nvm install` or `npm install -g`
+
+**Solution:**
+1. Check if user is in developers group:
+   ```bash
+   groups $USER
+   ```
+
+2. If not, add user to group:
+   ```bash
+   sudo bash install.sh add_dev_user $USER
+   ```
+
+3. Logout and login again, or run:
+   ```bash
+   newgrp developers
+   ```
+
+### NVM Command Not Found
+
+**Problem:** User doesn't have `nvm` command
+
+**Solution:**
+1. Source the profile script:
+   ```bash
+   source /etc/profile.d/nvm.sh
+   ```
+
+2. For zsh users:
+   ```bash
+   source /etc/zsh/nvm.zsh
+   ```
+
+3. Add to user's `.bashrc` or `.zshrc` if missing
+
+### NPM/Yarn Packages Not in PATH
+
+**Problem:** Globally installed packages not found
+
+**Solution:**
+1. Check if PATH includes npm-global:
+   ```bash
+   echo $PATH | grep npm-global
+   ```
+
+2. If not, reload profile:
+   ```bash
+   source /etc/profile.d/nvm.sh
+   ```
+
+3. Or add to shell config:
+   ```bash
+   export PATH="/usr/local/nvm/npm-global/bin:$PATH"
+   ```
+
+## Security Considerations
+
+### Why Use Group Permissions?
+
+1. **Controlled Access:** Only users in `developers` group can install packages
+2. **Shared Resources:** All developers use same Node.js versions
+3. **No Sudo Required:** Users don't need sudo for package management
+4. **Audit Trail:** Group membership is logged and tracked
+
+### Best Practices
+
+1. **Only add trusted users to developers group**
+   - These users can install any npm package globally
+   - Packages run with their user permissions
+
+2. **Regular audits**
+   ```bash
+   # List all users in developers group
+   getent group developers
+   
+   # List globally installed packages
+   npm list -g --depth=0
+   yarn global list
+   ```
+
+3. **Remove users when they leave**
+   ```bash
+   sudo gpasswd -d username developers
+   ```
+
+## Advanced Usage
+
+### Installing Specific Node.js Versions for Projects
 
 ```bash
-# Fix permissions cho NVM
-sudo chmod -R 755 /usr/local/nvm
+# Install multiple versions
+nvm install 18
+nvm install 20
+nvm install 22
 
-# Fix permissions cho Oh-My-Zsh
-sudo chmod -R 755 /usr/share/oh-my-zsh
+# Use specific version for current session
+nvm use 18
+
+# Use .nvmrc file in project
+echo "20" > .nvmrc
+nvm use  # Automatically uses version from .nvmrc
 ```
 
-## 📝 Notes
+### Managing Multiple Projects
 
-- Script yêu cầu quyền **sudo** để cài đặt global
-- **Khuyến nghị**: Logout và login lại sau khi cài đặt để áp dụng đầy đủ
-- Các file config cũ sẽ được backup với timestamp
-- NVM sẽ tự động cài Node.js LTS version mới nhất
-- User mới được tạo bằng `useradd` hoặc `adduser` sẽ tự động có config
+```bash
+# Project A uses Node 18
+cd /path/to/projectA
+nvm use 18
+npm install
 
-## 🔗 Links
+# Project B uses Node 22
+cd /path/to/projectB
+nvm use 22
+npm install
+```
 
-- [NVM GitHub](https://github.com/nvm-sh/nvm)
-- [Yarn](https://yarnpkg.com/)
-- [Oh-My-Zsh](https://ohmyz.sh/)
-- [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
-- [Fast Syntax Highlighting](https://github.com/zdharma-continuum/fast-syntax-highlighting)
-- [ZSH Autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
+### Yarn vs NPM
 
-## 📄 License
+Both are available. Choose based on your project:
 
-MIT License
+```bash
+# Using NPM
+npm install
+npm run dev
+
+# Using Yarn
+yarn install
+yarn dev
+```
+
+## Maintenance
+
+### Update NVM
+
+```bash
+# Re-run the setup script
+sudo bash install.sh global_dev
+```
+
+### Update Node.js LTS
+
+```bash
+nvm install --lts
+nvm alias default 'lts/*'
+```
+
+### Clean Up Old Versions
+
+```bash
+# List installed versions
+nvm list
+
+# Uninstall old version
+nvm uninstall 18
+```
+
+### Check Disk Usage
+
+```bash
+# Check NVM directory size
+du -sh /usr/local/nvm
+
+# Check npm cache
+du -sh /usr/local/nvm/npm-global
+
+# Check yarn cache
+du -sh /usr/local/nvm/yarn-cache
+
+# Clean caches
+npm cache clean --force
+yarn cache clean
+```
+
+## FAQ
+
+**Q: Can users install different Node.js versions?**
+A: Yes! All users in developers group can install any Node.js version. They all share the same NVM installation.
+
+**Q: Do changes affect other users?**
+A: Installing a Node.js version affects all users (they all share versions). But each user can use different versions with `nvm use`.
+
+**Q: What about package.json dependencies?**
+A: Local dependencies (in `node_modules`) are per-project, not affected by this setup.
+
+**Q: Can I still use sudo npm install -g?**
+A: You can, but it's not recommended. Use the developers group instead.
+
+**Q: How do I remove a user's access?**
+A: Remove them from developers group:
+```bash
+sudo gpasswd -d username developers
+```
+
+**Q: Does this work with Docker?**
+A: Yes! The host system tools (NVM, NPM, Yarn) work independently of Docker containers.
+
+## Summary
+
+This setup provides:
+- ✅ Shared Node.js versions for all developers
+- ✅ No sudo required for package installation
+- ✅ Centralized management
+- ✅ Proper security through group permissions
+- ✅ Easy user management
+- ✅ Works for existing and new users
+- ✅ Compatible with ZSH and Bash
+
+For issues or questions, refer to the main README.md or check the scripts in `setup/packages/`.
 

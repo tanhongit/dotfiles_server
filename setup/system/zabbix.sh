@@ -134,7 +134,11 @@ install_zabbix_server() {
         echo "  1) Use existing ${DB_TYPE} (recommended if working)"
         echo "  2) Remove ${DB_TYPE} and install fresh MySQL 8.0"
         echo "  3) Cancel installation"
-        read -r -p "Enter choice [1-3]: " db_choice
+        if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
+            zabbix_choice="1"
+        else
+            read -r -p "Enter choice [1-3]: " zabbix_choice
+        fi
 
         case "$db_choice" in
             1)
@@ -316,7 +320,11 @@ EOFMYSQL
         echo "No web server detected. Please choose:"
         echo "  1) Nginx (recommended, lightweight)"
         echo "  2) Apache (traditional)"
-        read -r -p "Enter choice [1-2]: " choice
+        if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
+            choice="1"
+        else
+            read -r -p "Do you want to install Zabbix with Nginx or Apache? (1-2): " choice
+        fi
 
         case "$choice" in
             1)
@@ -550,7 +558,12 @@ install_zabbix_agent() {
     ZABBIX_SERVER_IP="${1:-}"
 
     if [ -z "$ZABBIX_SERVER_IP" ]; then
-        read -r -p "Enter Zabbix Server IP address: " ZABBIX_SERVER_IP
+        if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
+            ZABBIX_SERVER_IP="127.0.0.1"
+        else
+            read -r -p "Enter Zabbix Server IP address: " ZABBIX_SERVER_IP
+        fi
+
     else
         print_info "Using Zabbix Server IP: ${ZABBIX_SERVER_IP}"
     fi

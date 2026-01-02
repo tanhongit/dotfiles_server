@@ -82,7 +82,11 @@ echo "####################### install Zabbix #############################"
 echo "####################################################################"
 echo ''
 while true; do
-    read -r -p "Do you want to install Zabbix? (server/client/no)  " zabbix_choice
+    if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
+        zabbix_choice="server"
+    else
+        read -r -p "Do you want to install Zabbix? (server/client/no)  " zabbix_choice
+    fi
     case $zabbix_choice in
     [Ss][Ee][Rr][Vv][Ee][Rr]|server)
         cd "$THIS_DIR"/setup/system/ || exit
