@@ -53,13 +53,11 @@ echo ""
 
 # Detect PHP-FPM version
 PHP_FPM_SOCK=""
-PHP_VERSION=""
 
 echo "🔍 Detecting PHP-FPM..."
 for php_ver in 8.4 8.3 8.2 8.1 8.0 7.4; do
     if [ -S "/run/php/php${php_ver}-fpm.sock" ]; then
         PHP_FPM_SOCK="/run/php/php${php_ver}-fpm.sock"
-        PHP_VERSION="$php_ver"
         echo "✓ Found PHP ${php_ver} FPM"
         break
     fi
@@ -68,7 +66,6 @@ done
 # Fallback to generic php-fpm
 if [ -z "$PHP_FPM_SOCK" ] && [ -S "/run/php/php-fpm.sock" ]; then
     PHP_FPM_SOCK="/run/php/php-fpm.sock"
-    PHP_VERSION="generic"
     echo "✓ Found generic PHP FPM"
 fi
 

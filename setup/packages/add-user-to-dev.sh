@@ -57,7 +57,7 @@ if [ "$1" = "--all" ] || [ "$1" = "-a" ]; then
     echo ""
 
     added_count=0
-    while IFS=: read -r username _ uid _ _ home shell; do
+    while IFS=: read -r username _ uid _ _ home _; do
         # Skip if UID < 1000 (system users) or if home doesn't exist
         if [ "$uid" -ge 1000 ] && [ -d "$home" ]; then
             if add_user_to_group "$username"; then
