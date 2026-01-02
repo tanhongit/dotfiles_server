@@ -546,8 +546,14 @@ install_zabbix_agent() {
     echo '=========================================='
     echo ''
 
-    # Get Zabbix server address from user
-    read -r -p "Enter Zabbix Server IP address: " ZABBIX_SERVER_IP
+    # Get Zabbix server address from parameter or user input
+    ZABBIX_SERVER_IP="${1:-}"
+
+    if [ -z "$ZABBIX_SERVER_IP" ]; then
+        read -r -p "Enter Zabbix Server IP address: " ZABBIX_SERVER_IP
+    else
+        print_info "Using Zabbix Server IP: ${ZABBIX_SERVER_IP}"
+    fi
 
     if [ -z "$ZABBIX_SERVER_IP" ]; then
         print_error "Zabbix Server IP is required"
@@ -651,7 +657,7 @@ main() {
             install_zabbix_server
             ;;
         client)
-            install_zabbix_agent
+            install_zabbix_agent "${2:-}"
             ;;
         *)
             show_usage

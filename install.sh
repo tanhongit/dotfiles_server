@@ -66,9 +66,10 @@ zabbix_server() {
 }
 
 zabbix_client() {
+    local server_ip="${1:-}"
     cd "$CURRENT_DIR/setup/system" || exit
-    if [ -n "${2:-}" ]; then
-        sudo bash zabbix.sh client "${2}"
+    if [ -n "$server_ip" ]; then
+        sudo bash zabbix.sh client "$server_ip"
     else
         sudo bash zabbix.sh client
     fi
@@ -155,7 +156,7 @@ case "${1:-}" in
         ;;
 
     zabbix_client | zc)
-        zabbix_client "$@"
+        zabbix_client "${2:-}"
         ;;
 
     fix_mysql | fix_mysql_frozen | fmf)
