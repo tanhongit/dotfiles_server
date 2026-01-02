@@ -66,7 +66,8 @@ get_php_fpm_socket() {
 
     if [ -n "$php_fpm_service" ]; then
         # Extract version from service name (e.g., php8.3-fpm -> 8.3)
-        local version=$(echo "$php_fpm_service" | grep -oP '\d+\.\d+')
+        local version
+        version=$(echo "$php_fpm_service" | grep -oP '\d+\.\d+')
 
         if [ -n "$version" ]; then
             socket_path="/run/php/php${version}-fpm.sock"
