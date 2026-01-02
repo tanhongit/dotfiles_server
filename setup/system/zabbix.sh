@@ -135,9 +135,9 @@ install_zabbix_server() {
         echo "  2) Remove ${DB_TYPE} and install fresh MySQL 8.0"
         echo "  3) Cancel installation"
         if [[ $ACCEPT_INSTALL =~ ^[Yy]$ ]]; then
-            zabbix_choice="1"
+            db_choice="1"
         else
-            read -r -p "Enter choice [1-3]: " zabbix_choice
+            read -r -p "Enter choice [1-3]: " db_choice
         fi
 
         case "$db_choice" in

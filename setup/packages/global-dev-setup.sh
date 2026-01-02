@@ -124,7 +124,7 @@ add_user_to_developers "$CURRENT_USER"
 if [ "$FORCE_UPDATE" = true ]; then
     echo ""
     echo "Adding all existing users to developers group..."
-    while IFS=: read -r username _ uid _ _ home shell; do
+    while IFS=: read -r username _ uid _ _ home _; do
         # Skip if UID < 1000 (system users) or if home doesn't exist
         if [ "$uid" -ge 1000 ] && [ -d "$home" ]; then
             add_user_to_developers "$username"

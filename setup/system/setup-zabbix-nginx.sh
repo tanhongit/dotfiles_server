@@ -76,7 +76,6 @@ if [ -z "$PHP_FPM_SOCK" ]; then
     echo "⚠️  PHP-FPM socket not found, will use default: /run/php/php8.3-fpm.sock"
     echo "⚠️  Make sure PHP-FPM is installed and running"
     PHP_FPM_SOCK="/run/php/php8.3-fpm.sock"
-    PHP_VERSION="8.3"
 fi
 
 echo "📌 PHP-FPM socket: $PHP_FPM_SOCK"
@@ -208,9 +207,7 @@ if [ "$USE_SSL" = true ]; then
     echo "⚠️  Make sure your domain $DOMAIN_NAME points to this server IP!"
     read -r -p "Press Enter to continue or Ctrl+C to cancel..."
 
-    certbot --nginx -d "$DOMAIN_NAME" --non-interactive --agree-tos --email "$EMAIL" --redirect
-
-    if [ $? -eq 0 ]; then
+    if certbot --nginx -d "$DOMAIN_NAME" --non-interactive --agree-tos --email "$EMAIL" --redirect; then
         echo "✓ SSL certificate obtained successfully"
         echo "✓ HTTPS redirect enabled"
     else
