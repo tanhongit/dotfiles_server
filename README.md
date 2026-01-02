@@ -43,6 +43,7 @@ The runner has the following commands:
 | `php_extension`, `pe` | Install PHP extensions                                  |
 | `lazydocker`, `ld`    | Install lazydocker                                      |
 | `global_dev`, `gd`    | Setup NVM, NPM, Yarn, ZSH globally for all users        |
+| `add_dev_user`, `adu` | Add user(s) to developers group for dev tools access    |
 | `zabbix_server`, `zs` | Install Zabbix Server with auto web server detection    |
 | `zabbix_client`, `zc` | Install Zabbix Agent (client)                           |
 | `fix_mysql`, `fmf`    | Fix MySQL FROZEN issue (when downgrading from MariaDB)  |
@@ -59,10 +60,11 @@ sudo bash install.sh gd
 
 This will install and configure:
 - ✓ ZSH with Oh-My-Zsh (Powerlevel10k theme)
-- ✓ NVM (Node Version Manager)
+- ✓ NVM (Node Version Manager) at `/usr/local/nvm`
 - ✓ Node.js (LTS version)
-- ✓ NPM (Node Package Manager)
-- ✓ Yarn (Package Manager)
+- ✓ NPM (Node Package Manager) with global packages at `/usr/local/nvm/npm-global`
+- ✓ Yarn (Package Manager) with global packages at `/usr/local/nvm/yarn-global`
+- ✓ Creates `developers` group with proper permissions
 
 **Force update dotfiles for all existing users:**
 
@@ -76,6 +78,40 @@ The `-f` or `--force` flag will:
 - Force copy/update all dotfiles (.zshrc, .zsh_aliases, .p10k.zsh) from `home/` folder to all existing users
 - Backup existing dotfiles before updating
 - Apply new configuration to all users with UID >= 1000
+- Automatically add all existing users to `developers` group
+
+#### Managing User Permissions
+
+After installing global dev tools, users need to be added to the `developers` group to use NVM, NPM, and Yarn:
+
+**Add specific user(s):**
+
+```bash
+sudo bash install.sh add_dev_user john
+# or multiple users
+sudo bash install.sh add_dev_user john mary bob
+```
+
+**Add all existing users:**
+
+```bash
+sudo bash install.sh add_dev_user --all
+# or
+sudo bash install.sh adu -a
+```
+
+**Important:** Users must logout and login again (or run `newgrp developers`) to apply group membership.
+
+After that, users can:
+- Install Node.js versions: `nvm install 22`
+- Install npm packages globally: `npm install -g <package>`
+- Install yarn packages globally: `yarn global add <package>`
+
+**Benefits of using `developers` group:**
+- ✓ No need to use `sudo` for installing packages
+- ✓ All users in the group share the same Node.js versions
+- ✓ Centralized package management
+- ✓ Secure permissions (only authorized users can install packages)
 
 ### Zabbix Setup
 

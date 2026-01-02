@@ -79,6 +79,54 @@ if ! bash "$CURRENT_DIR/yarn-global.sh"; then
     exit 1
 fi
 
+# Step 4: Setup permissions for existing users
+echo ""
+echo "Step 4/4: Configuring permissions for existing users..."
+echo "---------------------------------------------------"
+
+# Function to add user to developers group
+add_user_to_developers() {
+    local username="$1"
+
+    # Skip system users (UID < 1000)
+    local uid
+    uid=$(id -u "$username" 2>/dev/null)
+    if [ -z "$uid" ] || [ "$uid" -lt 1000 ]; then
+        return
+    fi
+
+    # Check if user is already in developers group
+    if groups "$username" | grep -q "\bdevelopers\b"; then
+        echo "  ✓ User '$username' already in developers group"
+    else
+        echo "  → Adding user '$username' to developers group..."
+        sudo usermod -aG developers "$username"
+        echo "  ✓ User '$username' added to developers group"
+    fi
+}
+
+# Create developers group if not exists
+if ! getent group developers > /dev/null 2>&1; then
+    echo "Creating 'developers' group..."
+    sudo groupadd developers
+fi
+
+# Add current user to developers group
+CURRENT_USER="${SUDO_USER:-$(whoami)}"
+add_user_to_developers "$CURRENT_USER"
+
+# Optionally add all existing non-system users
+if [ "$FORCE_UPDATE" = true ]; then
+    echo ""
+    echo "Adding all existing users to developers group..."
+    while IFS=: read -r username _ uid _ _ home shell; do
+        # Skip if UID < 1000 (system users) or if home doesn't exist
+        if [ "$uid" -ge 1000 ] && [ -d "$home" ]; then
+            add_user_to_developers "$username"
+        fi
+    done < /etc/passwd
+fi
+
 # Final summary
 echo ""
 echo "======================================================="
@@ -89,30 +137,42 @@ echo "📦 Installed Components:"
 echo "  ✓ ZSH + Oh-My-Zsh (globally at /usr/share/oh-my-zsh)"
 echo "  ✓ NVM (globally at /usr/local/nvm)"
 echo "  ✓ Node.js LTS"
-echo "  ✓ NPM"
+echo "  ✓ NPM (global packages at /usr/local/nvm/npm-global)"
 echo "  ✓ Yarn"
 echo ""
 echo "🔧 Configuration:"
+echo "  ✓ 'developers' group created for shared access"
+echo "  ✓ Current user added to developers group"
 echo "  ✓ All new users will automatically have access"
 echo "  ✓ Templates created in /etc/skel/"
 echo "  ✓ Profile scripts in /etc/profile.d/"
 echo ""
+echo "🔐 Permissions:"
+echo "  ✓ Users in 'developers' group can install npm/yarn packages globally"
+echo "  ✓ Users in 'developers' group can install Node versions via nvm"
+echo ""
 echo "📌 Next Steps:"
 echo ""
-echo "1. To apply ZSH to current user:"
-echo "   sudo setup-zsh-user"
-echo "   sudo chsh -s /bin/zsh \$USER"
-echo ""
-echo "2. To use NVM in current session:"
+echo "1. To apply changes in current session (REQUIRED):"
+echo "   newgrp developers"
 echo "   source /etc/profile.d/nvm.sh"
+echo ""
+echo "2. Or logout and login again to apply group membership"
+echo ""
+echo "3. To use NVM:"
 echo "   nvm --version"
+echo "   nvm install 22    # Install Node.js version 22"
+echo "   nvm use 22        # Use Node.js version 22"
 echo ""
-echo "3. For new users:"
+echo "4. For new users:"
 echo "   They will automatically have ZSH and NVM configured!"
+echo "   Add them to developers group:"
+echo "   sudo usermod -aG developers <username>"
 echo ""
-echo "4. To setup existing users:"
-echo "   sudo setup-zsh-user [username]"
-echo "   sudo chsh -s /bin/zsh [username]"
+echo "5. To setup existing users:"
+echo "   sudo usermod -aG developers <username>"
+echo "   sudo setup-zsh-user <username>"
+echo "   sudo chsh -s /bin/zsh <username>"
 echo ""
 echo "======================================================="
 echo ""

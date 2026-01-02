@@ -60,6 +60,12 @@ global_dev_setup() {
     fi
 }
 
+add_dev_user() {
+    cd "$CURRENT_DIR/setup/packages" || exit
+    shift # Remove first argument (command name)
+    bash add-user-to-dev.sh "$@"
+}
+
 zabbix_server() {
     cd "$CURRENT_DIR/setup/system" || exit
     sudo bash zabbix.sh server
@@ -91,11 +97,17 @@ usage() {
     echo '  php_extension   Install php extension'
     echo '  lazydocker      Install lazydocker'
     echo '  global_dev      Setup NVM, NPM, Yarn, ZSH globally for all users'
+    echo '  add_dev_user    Add user(s) to developers group for NVM/NPM/Yarn access'
     echo '  zabbix_server   Install Zabbix Server (auto-detect Nginx/Apache)'
     echo '  zabbix_client   Install Zabbix Agent (client) [server_ip]'
+    echo '  fix_mysql       Fix MySQL frozen issue after MariaDB to MySQL migration'
     echo ''
     echo 'Args for global_dev:'
     echo '  -f, --force     Force copy/update dotfiles to all existing users'
+    echo ''
+    echo 'Args for add_dev_user:'
+    echo '  <username>      Username(s) to add to developers group'
+    echo '  --all, -a       Add all non-system users to developers group'
     echo ''
     echo 'Args for ssh_port:'
     echo '  [port]          New ssh port (valid port number)'
@@ -115,6 +127,9 @@ usage() {
     echo "  bash $0 lazydocker"
     echo "  bash $0 global_dev"
     echo "  bash $0 global_dev -f"
+    echo "  bash $0 add_dev_user john"
+    echo "  bash $0 add_dev_user john mary bob"
+    echo "  bash $0 add_dev_user --all"
     echo "  bash $0 zabbix_server"
     echo "  bash $0 zabbix_client"
     echo "  bash $0 zabbix_client 192.168.1.100"
@@ -149,6 +164,10 @@ case "${1:-}" in
 
     global_dev | gd)
         global_dev_setup "$@"
+        ;;
+
+    add_dev_user | adu)
+        add_dev_user "$@"
         ;;
 
     zabbix_server | zs)

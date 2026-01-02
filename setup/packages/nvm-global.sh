@@ -27,9 +27,23 @@ else
     echo "✓ NVM already installed at $NVM_DIR"
 fi
 
-# Set permissions for all users
+# Create developers group if it doesn't exist
+if ! getent group developers > /dev/null 2>&1; then
+    echo "Creating 'developers' group..."
+    sudo groupadd developers
+fi
+
+# Set ownership and permissions for all users
 echo "Setting permissions for all users..."
-sudo chmod -R 755 "$NVM_DIR"
+sudo chown -R root:developers "$NVM_DIR"
+sudo chmod -R 775 "$NVM_DIR"
+sudo find "$NVM_DIR" -type d -exec chmod 775 {} \;
+sudo find "$NVM_DIR" -type f -exec chmod 664 {} \;
+sudo chmod +x "$NVM_DIR/nvm.sh"
+sudo chmod +x "$NVM_DIR/bash_completion" 2>/dev/null || true
+
+# Set SGID bit so new files inherit group ownership
+sudo find "$NVM_DIR" -type d -exec chmod g+s {} \;
 
 # Create profile.d script to load NVM for all users
 echo "Creating /etc/profile.d/nvm.sh for auto-loading..."
@@ -38,6 +52,10 @@ sudo tee /etc/profile.d/nvm.sh > /dev/null <<'EOF'
 export NVM_DIR="/usr/local/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# NPM global packages directory
+export NPM_GLOBAL_DIR="/usr/local/nvm/npm-global"
+export PATH="$NPM_GLOBAL_DIR/bin:$PATH"
 EOF
 
 sudo chmod +x /etc/profile.d/nvm.sh
@@ -49,6 +67,10 @@ sudo tee /etc/zsh/nvm.zsh > /dev/null <<'EOF'
 export NVM_DIR="/usr/local/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# NPM global packages directory
+export NPM_GLOBAL_DIR="/usr/local/nvm/npm-global"
+export PATH="$NPM_GLOBAL_DIR/bin:$PATH"
 EOF
 
 sudo chmod +x /etc/zsh/nvm.zsh
@@ -70,6 +92,29 @@ if command -v nvm &>/dev/null; then
     echo "✓ Node.js installed successfully"
     node --version
     npm --version
+
+    # Setup npm global directory with proper permissions
+    echo ""
+    echo "Configuring npm global directory..."
+    NPM_GLOBAL_DIR="/usr/local/nvm/npm-global"
+    sudo mkdir -p "$NPM_GLOBAL_DIR"
+    sudo chown -R root:developers "$NPM_GLOBAL_DIR"
+    sudo chmod -R 775 "$NPM_GLOBAL_DIR"
+    sudo chmod g+s "$NPM_GLOBAL_DIR"
+
+    # Configure npm to use this directory
+    npm config set prefix "$NPM_GLOBAL_DIR"
+
+    # Add to PATH in profile
+    if ! grep -q "NPM_GLOBAL_DIR" /etc/profile.d/nvm.sh; then
+        sudo tee -a /etc/profile.d/nvm.sh > /dev/null <<'NPMEOF'
+# NPM global packages directory
+export NPM_GLOBAL_DIR="/usr/local/nvm/npm-global"
+export PATH="$NPM_GLOBAL_DIR/bin:$PATH"
+NPMEOF
+    fi
+
+    echo "✓ NPM global directory configured at $NPM_GLOBAL_DIR"
 else
     echo "⚠️  Please logout and login again to use nvm"
 fi
@@ -140,6 +185,12 @@ echo "✓ NVM global setup completed!"
 echo "================================"
 echo ""
 echo "📌 NVM installed at: $NVM_DIR"
+echo "📌 NPM global packages at: /usr/local/nvm/npm-global"
+echo "📌 All users in 'developers' group can use NVM without sudo"
+echo ""
+echo "📌 To add a user to developers group:"
+echo "   sudo usermod -aG developers <username>"
+echo ""
 echo "📌 All new users will have NVM automatically configured"
 echo "📌 To use NVM in current session:"
 echo "   source /etc/profile.d/nvm.sh"

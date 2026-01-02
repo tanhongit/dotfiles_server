@@ -42,6 +42,26 @@ else
     fi
 fi
 
+# Setup Yarn global directory with proper permissions
+echo ""
+echo "Configuring Yarn global directory permissions..."
+YARN_GLOBAL_DIR="/usr/local/nvm/yarn-global"
+YARN_CACHE_DIR="/usr/local/nvm/yarn-cache"
+
+# Create directories
+sudo mkdir -p "$YARN_GLOBAL_DIR" "$YARN_CACHE_DIR"
+
+# Set ownership to developers group
+sudo chown -R root:developers "$YARN_GLOBAL_DIR" "$YARN_CACHE_DIR"
+sudo chmod -R 775 "$YARN_GLOBAL_DIR" "$YARN_CACHE_DIR"
+sudo chmod g+s "$YARN_GLOBAL_DIR" "$YARN_CACHE_DIR"
+
+# Configure yarn to use these directories
+yarn config set prefix "$YARN_GLOBAL_DIR"
+yarn config set cache-folder "$YARN_CACHE_DIR"
+
+echo "✓ Yarn directories configured with proper permissions"
+
 # Enable Corepack (modern way to manage Yarn/pnpm)
 echo ""
 echo "Enabling Corepack for Yarn management..."
@@ -58,7 +78,9 @@ echo "✓ Yarn global setup completed!"
 echo "================================"
 echo ""
 echo "📌 Yarn installed globally via npm"
-echo "📌 All users can use yarn command"
+echo "📌 Yarn global directory: $YARN_GLOBAL_DIR"
+echo "📌 Yarn cache directory: $YARN_CACHE_DIR"
+echo "📌 Users in 'developers' group can install yarn packages globally"
 echo ""
 echo "📌 Verify installation:"
 echo "   yarn --version"
@@ -66,6 +88,7 @@ echo ""
 echo "📌 Common yarn commands:"
 echo "   yarn init          - Create a new project"
 echo "   yarn add [pkg]     - Add a package"
+echo "   yarn global add [pkg] - Add a global package"
 echo "   yarn install       - Install dependencies"
 echo "   yarn upgrade       - Upgrade dependencies"
 echo ""
