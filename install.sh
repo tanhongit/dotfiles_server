@@ -81,6 +81,16 @@ zabbix_client() {
     fi
 }
 
+update_zabbix_ip() {
+    local server_ip="${1:-}"
+    cd "$CURRENT_DIR/setup/system" || exit
+    if [ -n "$server_ip" ]; then
+        sudo bash update-zabbix-server-ip.sh "$server_ip"
+    else
+        sudo bash update-zabbix-server-ip.sh
+    fi
+}
+
 fix_mysql_frozen() {
     cd "$CURRENT_DIR/setup/system" || exit
     sudo bash fix-mysql-frozen.sh
@@ -100,6 +110,7 @@ usage() {
     echo '  add_dev_user    Add user(s) to developers group for NVM/NPM/Yarn access'
     echo '  zabbix_server   Install Zabbix Server (auto-detect Nginx/Apache)'
     echo '  zabbix_client   Install Zabbix Agent (client) [server_ip]'
+    echo '  update_zabbix_ip Update Zabbix Server IP for installed agent [new_ip]'
     echo '  fix_mysql       Fix MySQL frozen issue after MariaDB to MySQL migration'
     echo ''
     echo 'Args for global_dev:'
@@ -118,6 +129,9 @@ usage() {
     echo 'Args for zabbix_client:'
     echo '  [server_ip]     Zabbix Server IP (optional, will prompt if not provided)'
     echo ''
+    echo 'Args for update_zabbix_ip:'
+    echo '  [new_ip]        New Zabbix Server IP (optional, will prompt if not provided)'
+    echo ''
     echo 'Example:'
     echo "  bash $0 setup"
     echo "  bash $0 ssh_port 12345"
@@ -133,6 +147,8 @@ usage() {
     echo "  bash $0 zabbix_server"
     echo "  bash $0 zabbix_client"
     echo "  bash $0 zabbix_client 192.168.1.100"
+    echo "  bash $0 update_zabbix_ip"
+    echo "  bash $0 update_zabbix_ip 192.168.1.200"
     echo "  bash $0 fix_mysql"
     echo ''
 }
@@ -176,6 +192,10 @@ case "${1:-}" in
 
     zabbix_client | zc)
         zabbix_client "${2:-}"
+        ;;
+
+    update_zabbix_ip | uzi)
+        update_zabbix_ip "${2:-}"
         ;;
 
     fix_mysql | fix_mysql_frozen | fmf)

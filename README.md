@@ -34,19 +34,20 @@ cd dotfiles_server
 
 The runner has the following commands:
 
-| Command               | Description                                             |
-|-----------------------|---------------------------------------------------------|
-| `setup`, `s`, `a`     | Setup the server                                        |
-| `ssh_port`, `sp`      | Change the SSH port                                     |
-| `ssh_timeout`, `st`   | Configure SSH timeout (auto disconnect after 5min idle) |
-| `php`, `php-install`  | Install PHP version you want                            |
-| `php_extension`, `pe` | Install PHP extensions                                  |
-| `lazydocker`, `ld`    | Install lazydocker                                      |
-| `global_dev`, `gd`    | Setup NVM, NPM, Yarn, ZSH globally for all users        |
-| `add_dev_user`, `adu` | Add user(s) to developers group for dev tools access    |
-| `zabbix_server`, `zs` | Install Zabbix Server with auto web server detection    |
-| `zabbix_client`, `zc` | Install Zabbix Agent (client)                           |
-| `fix_mysql`, `fmf`    | Fix MySQL FROZEN issue (when downgrading from MariaDB)  |
+| Command                   | Description                                             |
+|---------------------------|---------------------------------------------------------|
+| `setup`, `s`, `a`         | Setup the server                                        |
+| `ssh_port`, `sp`          | Change the SSH port                                     |
+| `ssh_timeout`, `st`       | Configure SSH timeout (auto disconnect after 5min idle) |
+| `php`, `php-install`      | Install PHP version you want                            |
+| `php_extension`, `pe`     | Install PHP extensions                                  |
+| `lazydocker`, `ld`        | Install lazydocker                                      |
+| `global_dev`, `gd`        | Setup NVM, NPM, Yarn, ZSH globally for all users        |
+| `add_dev_user`, `adu`     | Add user(s) to developers group for dev tools access    |
+| `zabbix_server`, `zs`     | Install Zabbix Server with auto web server detection    |
+| `zabbix_client`, `zc`     | Install Zabbix Agent (client)                           |
+| `update_zabbix_ip`, `uzi` | Update Zabbix Server IP for installed agent             |
+| `fix_mysql`, `fmf`        | Fix MySQL FROZEN issue (when downgrading from MariaDB)  |
 
 ### Global Dev Setup
 
@@ -153,6 +154,28 @@ Features:
 - ✓ Prompts for Zabbix Server IP
 - ✓ Configures agent to connect to server
 - ✓ Configures firewall automatically
+
+**Update Zabbix Server IP (for already installed agents):**
+
+```bash
+# Method 1: Will prompt for new Server IP
+sudo bash install.sh update_zabbix_ip
+# or
+sudo bash install.sh uzi
+
+# Method 2: Pass new Server IP directly
+sudo bash install.sh update_zabbix_ip 192.168.1.200
+# or
+sudo bash install.sh uzi 192.168.1.200
+```
+
+Features:
+- ✓ Updates existing Zabbix Agent configuration
+- ✓ Validates IP address format
+- ✓ Creates backup before changes
+- ✓ Auto-restarts agent service
+- ✓ Verifies connection to new server
+- ✓ Supports both Zabbix Agent and Agent2
 
 ## License
 
