@@ -20,6 +20,24 @@ git clone git@github.com:tanhongit/dotfiles_server.git
 cd dotfiles_server
 ```
 
+### Method 1: Using Makefile (Recommended)
+
+Quick and easy commands using Make:
+
+```bash
+# Show all available commands
+make help
+
+# Setup server
+make setup
+# or use short alias
+make s
+```
+
+> See [Makefile Guide](docs/MAKEFILE-GUIDE.md) for complete documentation.
+
+### Method 2: Direct Script
+
 ```bash
 ./install.sh a
 ```
@@ -29,6 +47,32 @@ cd dotfiles_server
 > ```bash
 > chmod +x install.sh
 > ```
+
+## Quick Commands (Makefile)
+
+| Command | Description | Short Alias |
+|---------|-------------|-------------|
+| `make setup` | Setup the server | `make s` |
+| `make ssh-port PORT=XXXX` | Change SSH port | `make sp PORT=XXXX` |
+| `make ssh-timeout` | Configure SSH timeout | `make st` |
+| `make php` | Install PHP | `make p` |
+| `make php-ext VER=X.X` | Install PHP extensions | `make pe VER=X.X` |
+| `make global-dev` | Setup NVM, NPM, Yarn, ZSH | `make gd` |
+| `make add-user USER=name` | Add user to developers group | `make au USER=name` |
+| `make zabbix-server` | Install Zabbix Server | `make zs` |
+| `make zabbix-client IP=X.X.X.X` | Install Zabbix Agent | `make zc IP=X.X.X.X` |
+| `make update-zabbix-ip IP=X.X.X.X` | Update Zabbix Server IP | `make uzi IP=X.X.X.X` |
+
+**Examples:**
+```bash
+make setup
+make ssh-port PORT=19742
+make global-dev
+make add-user USER=john
+make zabbix-client IP=192.168.1.100
+```
+
+Full documentation: [Makefile Guide](docs/MAKEFILE-GUIDE.md)
 
 ## Usage
 
