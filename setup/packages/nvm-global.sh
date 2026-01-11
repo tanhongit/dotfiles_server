@@ -85,7 +85,10 @@ if command -v nvm &>/dev/null; then
     echo "Installing latest LTS Node.js version..."
     if ! nvm install --lts --reinstall-packages-from=current; then
         echo "Cleaning up existing Node.js installation directories..."
-        sudo rm -rf "$NVM_DIR/versions/node/$(nvm version-remote --lts)"
+        NODE_VERSION=$(nvm version-remote --lts)
+        if [ -d "$NVM_DIR/versions/node/$NODE_VERSION" ]; then
+            sudo rm -rf "$NVM_DIR/versions/node/$NODE_VERSION"
+        fi
         nvm install --lts
     fi
     nvm use --lts
